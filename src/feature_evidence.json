@@ -1,0 +1,48 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-fix-admin-panel-authentication-flow-so-that-users-authenticated-via-internet-identity-are-properly-recognized-as-admins-and-can-access-the-add-product-interface-without-seeing-you-don-t-have-admin-privileges-error-message",
+      "featureTitle": "Fix admin panel authentication flow so that users authenticated via Internet Identity are properly recognized as admins and can access the Add Product interface without seeing 'You don't have admin privileges' error message",
+      "files": [
+        "frontend/src/components/Layout.tsx",
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/AdminPanel.tsx",
+        "frontend/src/pages/Login.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-22"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-configure-the-customization-form-to-send-all-customization-request-details-directly-to-whatsapp-number-91-9828288383-when-a-user-submits-interest-in-customized-products-including-pre-filled-message-with-customer-name-contact-details-product-specifications-wood-type-dimensions-and-any-additional-notes",
+      "featureTitle": "Configure the customization form to send all customization request details directly to WhatsApp number +91 9828288383 when a user submits interest in customized products, including pre-filled message with customer name, contact details, product specifications, wood type, dimensions, and any additional notes",
+      "files": [
+        "frontend/src/pages/Customize.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-23"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

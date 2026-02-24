@@ -1,0 +1,57 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Fix admin authentication and add WhatsApp integration for customization requests",
+  "requirements": [
+    {
+      "id": "REQ-22",
+      "summary": "Fix admin panel authentication flow so authenticated Internet Identity users are properly recognized as admins and can access the Add Product interface",
+      "acceptanceCriteria": [
+        "After logging in via Internet Identity, admin users can successfully access the admin panel",
+        "The 'Add Product' interface is displayed after successful authentication",
+        "No 'You don't have admin privileges' error appears for authenticated admin users",
+        "Admin can view and use the ProductForm component to add new products"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/AdminPanel.tsx",
+          "operation": "modify",
+          "description": "Fix authentication check logic to properly verify admin status using the authorization component. Replace the current isCallerAdmin query with proper role checking that waits for both actor initialization and user profile setup to complete before evaluating admin status. Add proper loading states that distinguish between actor loading, authentication check, and authorization verification. Ensure the 'You don't have admin privileges' message only appears after all checks are complete and the user is confirmed to not have admin role."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Review and update the useGetCallerUserRole hook to ensure it properly handles the authorization component's role-based access control. Verify that the hook correctly waits for actor initialization before fetching role data and that it returns the proper role enum value. Add proper error handling for authorization failures and ensure the hook integrates correctly with React Query's caching mechanism to prevent stale admin status checks."
+        },
+        {
+          "path": "frontend/src/pages/Login.tsx",
+          "operation": "modify",
+          "description": "Enhance the login flow to properly handle the authorization component's user profile setup requirement. After successful Internet Identity authentication, check if the user has a profile using getCallerUserProfile. If no profile exists, display a profile setup modal asking for the user's name and optional contact details. Only after profile creation is complete, proceed with role verification and admin panel redirect. Add loading states to prevent premature redirects before profile setup completes."
+        },
+        {
+          "path": "frontend/src/components/Layout.tsx",
+          "operation": "modify",
+          "description": "Update the admin panel navigation link visibility logic to use the authorization component's role checking. Replace any direct isCallerAdmin checks with proper role verification that accounts for actor loading states and user profile existence. Ensure the admin link only appears after successful authentication and role verification confirm the user has admin privileges. Add visual feedback during role checking to prevent UI flicker."
+        }
+      ]
+    },
+    {
+      "id": "REQ-23",
+      "summary": "Configure customization form to send all request details directly to WhatsApp number +91 9828288383 with pre-filled professional message",
+      "acceptanceCriteria": [
+        "Customization form submission opens WhatsApp with number +91 9828288383",
+        "WhatsApp message includes all form details: name, phone, email, product type, wood type, dimensions, and message",
+        "Message format is clear and professional, matching the luxury brand tone",
+        "If a reference image was uploaded, the message mentions that an image was provided",
+        "Form validation ensures all required fields are filled before opening WhatsApp"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/Customize.tsx",
+          "operation": "modify",
+          "description": "Replace the current form submission logic that calls submitCustomizationRequest backend method with a WhatsApp integration. On form submit, validate all required fields (name, phone, email, productType, woodType, dimensions, message). Construct a professional pre-filled WhatsApp message that includes all form details in a luxury-appropriate format: 'Hello, I'm interested in a customized product.\\n\\nCustomer Details:\\nName: [name]\\nPhone: [phone]\\nEmail: [email]\\n\\nProduct Specifications:\\nProduct Type: [productType]\\nWood Type: [woodType]\\nDimensions: [dimensions]\\n\\nAdditional Details:\\n[message]\\n\\n[If referenceImage exists: A reference image has been provided.]'. URL-encode the message and open WhatsApp using the format: `https://wa.me/919828288383?text=[encoded-message]`. Preserve all existing form fields, validation, and image upload UI, but remove backend submission. Keep the image upload feature to allow users to attach reference images locally before contacting via WhatsApp, and include a note in the WhatsApp message if an image was uploaded."
+        }
+      ]
+    }
+  ]
+}

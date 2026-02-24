@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --radius: 0.5rem;
+        
+        /* Luxury Minimalist Color Palette - Light Mode */
+        --background: 0.98 0.01 40;        /* Warm white #FEFEFE */
+        --foreground: 0.15 0.02 30;        /* Matte black #1A1A1A */
+        --card: 0.98 0.01 40;
+        --card-foreground: 0.15 0.02 30;
+        --popover: 0.98 0.01 40;
+        --popover-foreground: 0.15 0.02 30;
+        
+        /* Primary: Walnut Brown */
+        --primary: 0.35 0.08 35;           /* Walnut brown #6B4423 */
+        --primary-foreground: 0.98 0.01 40;
+        
+        /* Secondary: Beige */
+        --secondary: 0.95 0.02 45;         /* Beige #F5F1E8 */
+        --secondary-foreground: 0.35 0.08 35;
+        
+        --muted: 0.95 0.02 45;
+        --muted-foreground: 0.50 0.02 30;
+        --accent: 0.92 0.02 45;
+        --accent-foreground: 0.35 0.08 35;
+        
+        --destructive: 0.55 0.22 25;
+        --destructive-foreground: 0.98 0.01 40;
+        
+        --border: 0.90 0.01 40;
+        --input: 0.90 0.01 40;
+        --ring: 0.35 0.08 35;
+        
+        --chart-1: 0.60 0.15 180;
+        --chart-2: 0.65 0.12 140;
+        --chart-3: 0.55 0.18 80;
+        --chart-4: 0.70 0.10 220;
+        --chart-5: 0.58 0.16 40;
+    }
+
+    .dark {
+        /* Dark Mode - Inverted with warm tones */
+        --background: 0.15 0.02 30;        /* Dark background */
+        --foreground: 0.95 0.02 45;        /* Light text */
+        --card: 0.20 0.02 30;
+        --card-foreground: 0.95 0.02 45;
+        --popover: 0.18 0.02 30;
+        --popover-foreground: 0.95 0.02 45;
+        
+        /* Primary: Lighter walnut for dark mode */
+        --primary: 0.75 0.06 40;
+        --primary-foreground: 0.15 0.02 30;
+        
+        /* Secondary: Darker beige */
+        --secondary: 0.25 0.02 35;
+        --secondary-foreground: 0.95 0.02 45;
+        
+        --muted: 0.25 0.02 35;
+        --muted-foreground: 0.65 0.02 40;
+        --accent: 0.30 0.02 35;
+        --accent-foreground: 0.95 0.02 45;
+        
+        --destructive: 0.60 0.20 25;
+        --destructive-foreground: 0.15 0.02 30;
+        
+        --border: 0.30 0.01 30;
+        --input: 0.30 0.01 30;
+        --ring: 0.65 0.06 40;
+        
+        --chart-1: 0.55 0.18 200;
+        --chart-2: 0.60 0.14 160;
+        --chart-3: 0.65 0.16 100;
+        --chart-4: 0.58 0.12 240;
+        --chart-5: 0.62 0.14 60;
+    }
+
+    * {
+        @apply border-border;
+    }
+    
+    html {
+        scroll-behavior: smooth;
+    }
+    
+    body {
+        @apply bg-background text-foreground;
+        font-feature-settings: "rlig" 1, "calt" 1;
+    }
+}
+
+@layer utilities {
+    /* Premium animations */
+    .animate-fade-in {
+        animation: fadeIn 0.6s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+}

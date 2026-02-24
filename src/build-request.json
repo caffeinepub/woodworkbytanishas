@@ -1,0 +1,63 @@
+{
+  "kind": "build_request",
+  "title": "Fix admin authentication and add WhatsApp integration for customization requests",
+  "projectName": "WoodworkbyTanishas",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-22",
+      "text": "Fix admin panel authentication flow so that users authenticated via Internet Identity are properly recognized as admins and can access the Add Product interface without seeing 'You don't have admin privileges' error message",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-5"
+        ],
+        "quotes": [
+          "You don't have admin privileges. Contact the administrator for access. if iam login to admin access then this shows...how i add prodcts"
+        ]
+      },
+      "acceptanceCriteria": [
+        "After logging in via Internet Identity, admin users can successfully access the admin panel",
+        "The 'Add Product' interface is displayed after successful authentication",
+        "No 'You don't have admin privileges' error appears for authenticated admin users",
+        "Admin can view and use the ProductForm component to add new products"
+      ]
+    },
+    {
+      "id": "REQ-23",
+      "text": "Configure the customization form to send all customization request details directly to WhatsApp number +91 9828288383 when a user submits interest in customized products, including pre-filled message with customer name, contact details, product specifications, wood type, dimensions, and any additional notes",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "if anyone interest in customised products the details will be directly share with the whatsapp number +91 9828288383"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Customization form submission opens WhatsApp with number +91 9828288383",
+        "WhatsApp message includes all form details: name, phone, email, product type, wood type, dimensions, and message",
+        "Message format is clear and professional, matching the luxury brand tone",
+        "If a reference image was uploaded, the message mentions that an image was provided",
+        "Form validation ensures all required fields are filled before opening WhatsApp"
+      ]
+    }
+  ],
+  "constraints": [
+    "Maintain single-actor Motoko architecture in backend/main.mo",
+    "Do not modify read-only paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui",
+    "Preserve existing luxury minimalist design system with neutral earthy color palette",
+    "Keep WhatsApp number +91 9828288383 for customization requests"
+  ],
+  "nonGoals": [
+    "Changing the overall authentication system from Internet Identity to another provider",
+    "Adding email notifications for customization requests",
+    "Modifying the product catalog structure or existing products",
+    "Adding pricing information to products"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

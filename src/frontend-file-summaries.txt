@@ -1,0 +1,23 @@
+{
+  "frontend/src/App.tsx": "Main application component with TanStack Router configuration for all 8 routes (Home, Collection, ProductDetail, Customize, About, Login, Contact, AdminPanel) wrapped in Layout component.",
+  "frontend/src/components/Layout.tsx": "Root layout component with responsive header navigation, mobile menu, footer with brand info and attribution, admin link visibility based on role verification, and logout functionality that clears all cached data.",
+  "frontend/src/components/FloatingWhatsApp.tsx": "Fixed-position WhatsApp button component that accepts optional productName prop for dynamic message generation.",
+  "frontend/src/components/Hero.tsx": "Full-width hero banner component displaying generated hero image with overlay, tagline, and CTA button.",
+  "frontend/src/components/CategoryShowcase.tsx": "Grid showcase of four wood categories with generated images and links to filtered collection page.",
+  "frontend/src/components/FeaturedProducts.tsx": "Featured products section fetching from backend and displaying in responsive grid with ProductCard components.",
+  "frontend/src/components/ProductCard.tsx": "Reusable product card component displaying product image, name, description, and WhatsApp enquiry button (no pricing).",
+  "frontend/src/components/ImageGallery.tsx": "Product image gallery with main image display, thumbnail navigation, and previous/next controls.",
+  "frontend/src/components/ProductForm.tsx": "Admin form component for adding/editing products with all fields, multiple image upload with progress tracking, and validation using WoodType enum values.",
+  "frontend/src/pages/Home.tsx": "Homepage with Hero, CategoryShowcase, FeaturedProducts, about preview section, and customization CTA.",
+  "frontend/src/pages/Collection.tsx": "Collection page with category filter buttons and responsive product grid displaying all active products.",
+  "frontend/src/pages/ProductDetail.tsx": "Product detail page with large image gallery, full description, wood type/finish info, and prominent WhatsApp enquiry button.",
+  "frontend/src/pages/Customize.tsx": "Customization request form that sends all details directly to WhatsApp (+91 9828288383) with pre-filled professional message including customer details, product specifications, and reference image note.",
+  "frontend/src/pages/About.tsx": "About Us page with brand story, workshop image, specializations showcase, and contact information.",
+  "frontend/src/pages/Login.tsx": "Enhanced login page with Internet Identity integration, user profile setup modal for first-time users, and proper admin access check with redirect to admin panel after successful authentication and profile completion.",
+  "frontend/src/pages/Contact.tsx": "Contact page with form submission, contact information display, and WhatsApp integration.",
+  "frontend/src/pages/AdminPanel.tsx": "Admin panel page with product management (add/edit/delete), bulk import feature, and enhanced authentication guard that properly waits for actor initialization and role verification before showing access denied message.",
+  "frontend/src/hooks/useQueries.ts": "React Query hooks for all backend operations including user profiles, roles, products (public and admin), customization requests, and contact forms with proper actor initialization handling.",
+  "frontend/src/index.css": "Global styles with luxury minimalist OKLCH color system (walnut brown, beige, warm white, matte black), smooth scrolling, and premium animations.",
+  "frontend/tailwind.config.js": "Tailwind configuration with custom color palette, Playfair Display serif font, premium shadows, and extended design tokens.",
+  "frontend/src/components/BulkProductImport.tsx": "Bulk import component for adding 30 pre-configured Mango Wood products with images, descriptions, and metadata in a single operation with progress tracking."
+}
