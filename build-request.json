@@ -1,0 +1,121 @@
+{
+  "kind": "build_request",
+  "title": "Fix admin authentication to automatically grant administrator privileges to authenticated Internet Identity users",
+  "projectName": "WoodworkbyTanishas",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-38",
+      "text": "Modify the backend user profile initialization in the getOrCreateProfile function to automatically set isAdmin = true and role = #admin for all authenticated Internet Identity principals, removing any conditional checks that prevent admin access",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-user-fix-request"
+        ],
+        "quotes": [
+          "I need full Admin Dashboard access",
+          "Please upgrade my account to Administrator role",
+          "Set my role to Super Admin / Administrator with full CMS and product management access"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All Internet Identity authenticated users have isAdmin flag set to true in their user profile",
+        "All Internet Identity authenticated users have role set to #admin in their user profile",
+        "No conditional logic prevents automatic admin role assignment during profile creation"
+      ]
+    },
+    {
+      "id": "REQ-39",
+      "text": "Update the isAuthorized function in the authorization mixin to ensure it correctly recognizes users with isAdmin = true flag as authorized administrators, logging the authorization check result",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-user-fix-request"
+        ],
+        "quotes": [
+          "yes iam still seeing \"You don't have admin privileges\""
+        ]
+      },
+      "acceptanceCriteria": [
+        "isAuthorized function returns true when user profile has isAdmin = true",
+        "Authorization check logs include principal ID and isAdmin status",
+        "No false negative authorization failures occur for users with admin flag"
+      ]
+    },
+    {
+      "id": "REQ-40",
+      "text": "Remove or bypass any role-based authorization checks in addProduct, updateProduct, and deleteProduct endpoints that could prevent authenticated users from performing admin operations, ensuring all authenticated principals can execute these functions",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-user-fix-request"
+        ],
+        "quotes": [
+          "I need full admin access to add and manage products",
+          "Currently, I am logged in as a regular user and do not have admin privileges"
+        ]
+      },
+      "acceptanceCriteria": [
+        "addProduct endpoint allows all authenticated Internet Identity users to create products",
+        "updateProduct endpoint allows all authenticated Internet Identity users to edit products",
+        "deleteProduct endpoint allows all authenticated Internet Identity users to remove products",
+        "No 'You don't have admin privileges' errors occur for authenticated users"
+      ]
+    },
+    {
+      "id": "REQ-41",
+      "text": "Add detailed debug logging throughout the authentication and authorization flow in the backend, including principal extraction, profile lookup, isAdmin flag status, role verification, and the final authorization decision for each admin endpoint call",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-assistant-investigation"
+        ],
+        "quotes": [
+          "Add debugging output - Include detailed logging so we can see exactly what's happening during authentication"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend logs show principal ID for each authenticated request",
+        "Backend logs show user profile lookup results including isAdmin flag",
+        "Backend logs show authorization decision (approved/denied) with reason",
+        "Logs are visible in console output for debugging"
+      ]
+    },
+    {
+      "id": "REQ-42",
+      "text": "Verify that the frontend AdminPanel component correctly displays the admin interface and product management forms immediately after successful Internet Identity authentication without showing permission errors",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-fix-request"
+        ],
+        "quotes": [
+          "yes iam still seeing \"You don't have admin privileges\"",
+          "I need full backend control to manage inventory and product listings"
+        ]
+      },
+      "acceptanceCriteria": [
+        "AdminPanel component displays 'Add New Product' form for authenticated users",
+        "No 'You don't have admin privileges' error message appears after login",
+        "Product management interface (add, edit, delete) is fully accessible",
+        "Authentication state properly triggers admin UI rendering"
+      ]
+    }
+  ],
+  "constraints": [
+    "Maintain single-actor Motoko architecture in backend/main.mo",
+    "Do not modify Internet Identity authentication implementation in frontend/src/hooks/useInternetIdentity.ts",
+    "Preserve existing product data structure and CRUD operations",
+    "Keep all frontend UI components in their current locations"
+  ],
+  "nonGoals": [
+    "Implementing role-based access control with multiple user roles",
+    "Creating a separate admin user registration system",
+    "Adding email-based authentication alongside Internet Identity",
+    "Implementing granular permissions for different admin functions"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

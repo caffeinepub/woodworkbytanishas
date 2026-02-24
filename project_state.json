@@ -1,0 +1,442 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 15,
+  "summary": "Premium minimalist furniture website for WoodworkbyTanishas (Jodhpur, Rajasthan), featuring luxury design, inquiry-based product catalog with wood categories, WhatsApp integration, and admin panel",
+  "architectural_notes": [
+    "Luxury minimalist design with neutral earthy palette (beige, warm white, walnut brown, matte black)",
+    "Mobile-first responsive design with smooth scrolling and premium animations",
+    "Inquiry-based model - no pricing displayed on products",
+    "WhatsApp integration for product inquiries with templated messages",
+    "SEO optimized structure with fast loading prioritized",
+    "Admin authentication fixed to properly recognize Internet Identity login and grant access to Add Product interface",
+    "Customization requests are sent directly to WhatsApp +91 9828288383 with pre-filled product details",
+    "Site owner requires super admin role with full CMS and product management permissions"
+  ],
+  "known_issues": [
+    "Admin panel Add Product functionality still not working after authentication fix attempt",
+    "Currently logged-in user does not have admin privileges despite authentication being successful"
+  ],
+  "isFixRequest": true,
+  "existing_features": [
+    {
+      "id": "feature-create-home-page-with-full-width-hero-banner-tagline-crafting-timeless-wooden-elegance-category-showcase-section-displaying-all-four-wood-categories-featured-products-grid-about-preview-section-and-strong-cta-buttons",
+      "title": "Create Home page with full-width hero banner, tagline 'Crafting Timeless Wooden Elegance', category showcase section displaying all four wood categories, featured products grid, about preview section, and strong CTA buttons",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-collection-page-with-category-filtering-for-mango-wood-acacia-wood-line-range-and-customised-products-displaying-products-in-a-minimal-grid-layout-with-image-name-short-description-and-enquire-on-whatsapp-button-for-each-product-no-prices-displayed",
+      "title": "Create Collection page with category filtering for Mango Wood, Acacia Wood, Line Range, and Customised Products, displaying products in a minimal grid layout with image, name, short description, and 'Enquire on WhatsApp' button for each product (no prices displayed)",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-product-detail-page-with-large-image-gallery-product-description-wood-type-and-finish-information-and-prominent-whatsapp-enquiry-button-no-pricing-displayed",
+      "title": "Create Product Detail page with large image gallery, product description, wood type and finish information, and prominent WhatsApp enquiry button (no pricing displayed)",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-customize-page-with-premium-form-including-fields-name-phone-email-product-type-wood-type-dimensions-message-with-image-upload-option-for-reference-image-and-whatsapp-contact-button",
+      "title": "Create Customize page with premium form including fields: Name, Phone, Email, Product Type, Wood Type, Dimensions, Message, with image upload option for reference image and WhatsApp contact button",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-about-us-page-mentioning-establishment-in-2021-location-in-jodhpur-rajasthan-specialization-in-mango-wood-acacia-wood-and-custom-furniture-with-email-mahadevart60-gmail-com-displayed-using-premium-brand-storytelling-tone",
+      "title": "Create About Us page mentioning establishment in 2021, location in Jodhpur, Rajasthan, specialization in Mango Wood, Acacia Wood, and Custom Furniture, with email mahadevart60@gmail.com displayed, using premium brand storytelling tone",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-login-page-with-minimal-luxury-style-featuring-simple-email-and-password-login-using-internet-identity-integration",
+      "title": "Create Login page with minimal luxury style featuring simple email and password login using Internet Identity integration",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-contact-page-with-contact-form-email-mahadevart60-gmail-com-location-jodhpur-rajasthan-and-whatsapp-integration",
+      "title": "Create Contact page with contact form, email mahadevart60@gmail.com, location Jodhpur, Rajasthan, and WhatsApp integration",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-floating-whatsapp-button-on-all-pages-that-opens-whatsapp-with-pre-filled-message-format-hello-i-am-interested-in-product-name-from-woodworkbytanishas-please-share-details",
+      "title": "Implement floating WhatsApp button on all pages that opens WhatsApp with pre-filled message format: 'Hello, I am interested in [Product Name] from WoodworkbyTanishas. Please share details.'",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-admin-panel-interface-for-authenticated-users-to-add-edit-and-remove-products-with-fields-for-name-description-wood-type-category-images-and-finish-info",
+      "title": "Create admin panel interface for authenticated users to add, edit, and remove products with fields for name, description, wood type, category, images, and finish info",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-luxury-elegant-minimalist-design-system-across-all-pages-with-neutral-earthy-color-palette-beige-warm-white-walnut-brown-matte-black-accents-large-typography-clean-spacing-soft-shadows-smooth-scrolling-and-subtle-premium-animations",
+      "title": "Apply luxury, elegant, minimalist design system across all pages with neutral earthy color palette (beige, warm white, walnut brown, matte black accents), large typography, clean spacing, soft shadows, smooth scrolling, and subtle premium animations",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-all-pages-are-fully-responsive-with-mobile-first-design-approach-optimized-for-all-screen-sizes",
+      "title": "Ensure all pages are fully responsive with mobile-first design approach, optimized for all screen sizes",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-routing-for-all-seven-pages-home-collection-collection-product-detail-product-id-customize-customize-about-us-about-login-login-and-contact-contact",
+      "title": "Implement routing for all seven pages: Home (/), Collection (/collection), Product Detail (/product/:id), Customize (/customize), About Us (/about), Login (/login), and Contact (/contact)",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-render-generated-hero-banner-image-category-showcase-images-and-product-placeholder-images-as-static-assets-from-frontend-public-assets-generated",
+      "title": "Render generated hero banner image, category showcase images, and product placeholder images as static assets from frontend/public/assets/generated",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-admin-panel-authentication-flow-so-that-users-authenticated-via-internet-identity-are-properly-recognized-as-admins-and-can-access-the-add-product-interface-without-seeing-you-don-t-have-admin-privileges-error-message",
+      "title": "Fix admin panel authentication flow so that users authenticated via Internet Identity are properly recognized as admins and can access the Add Product interface without seeing 'You don't have admin privileges' error message",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-configure-the-customization-form-to-send-all-customization-request-details-directly-to-whatsapp-number-91-9828288383-when-a-user-submits-interest-in-customized-products-including-pre-filled-message-with-customer-name-contact-details-product-specifications-wood-type-dimensions-and-any-additional-notes",
+      "title": "Configure the customization form to send all customization request details directly to WhatsApp number +91 9828288383 when a user submits interest in customized products, including pre-filled message with customer name, contact details, product specifications, wood type, dimensions, and any additional notes",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-investigate-and-fix-the-admin-panel-authentication-and-authorization-flow-so-that-users-authenticated-via-internet-identity-can-successfully-add-products-through-the-admin-panel-without-encountering-permission-errors-or-ui-blocking-issues",
+      "title": "Investigate and fix the admin panel authentication and authorization flow so that users authenticated via Internet Identity can successfully add products through the admin panel without encountering permission errors or UI blocking issues",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-detailed-error-logging-and-user-feedback-in-the-productform-component-to-surface-specific-failure-reasons-when-product-creation-fails-including-backend-error-messages-authentication-state-issues-and-network-failures",
+      "title": "Add detailed error logging and user feedback in the ProductForm component to surface specific failure reasons when product creation fails, including backend error messages, authentication state issues, and network failures",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-product-creation-flow-in-the-admin-panel-so-that-authenticated-admin-users-can-successfully-add-new-products-without-encountering-permission-errors-or-authorization-failures",
+      "title": "Fix the product creation flow in the admin panel so that authenticated admin users can successfully add new products without encountering permission errors or authorization failures",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enhance-frontend-productform-error-handling-to-display-specific-backend-error-messages-when-product-creation-fails-including-authentication-failures-authorization-denials-validation-errors-and-network-issues",
+      "title": "Enhance frontend ProductForm error handling to display specific backend error messages when product creation fails, including authentication failures, authorization denials, validation errors, and network issues",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enable-full-product-management-capabilities-in-the-admin-panel-for-authenticated-administrators-including-the-ability-to-add-new-products-edit-existing-product-details-upload-and-manage-product-images-update-product-descriptions-and-remove-products-from-the-catalog",
+      "title": "Enable full product management capabilities in the admin panel for authenticated administrators, including the ability to add new products, edit existing product details, upload and manage product images, update product descriptions, and remove products from the catalog",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-category-management-functionality-is-fully-accessible-to-administrators-allowing-them-to-manage-and-assign-products-to-all-four-wood-categories-mango-wood-acacia-wood-line-range-customized-products",
+      "title": "Ensure category management functionality is fully accessible to administrators, allowing them to manage and assign products to all four wood categories (Mango Wood, Acacia Wood, Line Range, Customized Products)",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-grant-administrators-full-access-to-manage-whatsapp-inquiry-button-configurations-for-products-including-the-ability-to-customize-pre-filled-messages-and-whatsapp-integration-settings",
+      "title": "Grant administrators full access to manage WhatsApp inquiry button configurations for products, including the ability to customize pre-filled messages and WhatsApp integration settings",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-provide-comprehensive-website-content-management-capabilities-to-administrators-enabling-them-to-update-and-manage-all-site-content-including-homepage-sections-about-page-information-and-contact-details",
+      "title": "Provide comprehensive website content management capabilities to administrators, enabling them to update and manage all site content including homepage sections, about page information, and contact details",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-verify-that-the-frontend-adminpanel-component-correctly-displays-the-admin-interface-and-product-management-forms-immediately-after-successful-internet-identity-authentication-without-showing-permission-errors",
+      "title": "Verify that the frontend AdminPanel component correctly displays the admin interface and product management forms immediately after successful Internet Identity authentication without showing permission errors",
+      "reqIds": [
+        "REQ-42"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Home page with hero banner, category showcase, featured products, and CTAs",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Collection page with wood categories (Mango, Acacia, Line Range, Customised) and product grid",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Product detail page with image gallery, wood info, and WhatsApp enquiry",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Customize page with form (name, phone, email, product type, wood type, dimensions, message, image upload)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "About Us page with brand story, location, and contact info",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Login page with minimal luxury design",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Contact page with form and location details",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Floating WhatsApp button on all pages with auto-message format",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Admin panel to add/remove products",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Implement backend data models for products with fields: id, name, description, woodType (Mango Wood, Acacia Wood, Line Range, Customised Products), category, imageUrls (array), finishInfo, and isActive status",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Create backend API endpoints for admin operations: addProduct, updateProduct, deleteProduct, and listProducts with authentication check",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Create backend query endpoints: getProducts (with optional category filter), getProductById, and getFeaturedProducts",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Implement backend customization request storage with fields: name, phone, email, productType, woodType, dimensions, message, referenceImageUrl, timestamp, and status",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Create backend contact form submission storage with fields: name, email, message, timestamp",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Implement user authentication using Internet Identity for admin access",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Add 30 Mango Wood furniture products to website (side tables, dining tables, coffee tables, console tables, benches, storage cabinets, C-shaped tables, nesting tables)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Add 30 new Mango Wood furniture products to the backend database using the uploaded product images (p45_97.png, p25_54.png, p45_95.png, p52_114.png, p21_37.png, p17_26.png, p20_32.png, p22_41.png, p21_38.png, p45_96.png, p47_102.png, p52_115.png, p57_126.png, p19_30.png, p56_124.png, p67_150.png, p61_138.png, p69_154.png, p23_43.png, p48_105.png, p60_135.png, p49_108.png, p11_40.png, p18_28.png, p72_161.png, p62_139.png, p48_104.png, p57_125.png, p9_10.png, p55_122.png). Each product should include: product name based on furniture type and style, descriptive text highlighting wood grain and craftsmanship, wood type set to 'Mango Wood', category set to 'Mango Wood', finish information, and isActive status set to true",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Store and serve the 30 uploaded product images (p45_97.png through p55_122.png) as static assets in frontend/public/assets/generated so they can be displayed in the product catalog",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Fix admin panel authentication so logged-in admins can access Add Product interface",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-20",
+      "summary": "Configure customization form submissions to send details directly to WhatsApp number +91 9828288383",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-23",
+      "summary": "Verify that the backend addProduct mutation properly validates admin role using the authorization mixin and returns clear error messages when authorization fails, including checking the isAdmin flag and role verification logic",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-24",
+      "summary": "Debug and fix the admin role verification logic in the backend to ensure Internet Identity authenticated users are correctly granted admin privileges and can pass authorization checks when accessing the admin panel",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-26",
+      "summary": "Add comprehensive logging in the backend addProduct, updateProduct, and deleteProduct endpoints to capture authorization state, identity principal, role verification results, and specific failure points for debugging admin access issues",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-28",
+      "summary": "Review and fix the user profile initialization and role assignment logic to ensure new Internet Identity users are properly registered with admin role when first logging in to the admin panel",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-29",
+      "summary": "Grant full administrator permissions and super admin role to the site owner for complete backend control including product management, category management, image uploads, and all CMS operations",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-30",
+      "summary": "Modify the backend user profile initialization logic to automatically grant administrator role to the authenticated Internet Identity principal, ensuring the isAdmin flag is set to true and the role is set to 'admin' when users log in through Internet Identity",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-31",
+      "summary": "Update the backend authorization logic in all admin-protected endpoints (addProduct, updateProduct, deleteProduct) to correctly recognize Internet Identity authenticated users as administrators and allow them to pass authorization checks",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-32",
+      "summary": "Modify the backend user profile initialization in the getOrCreateProfile function to automatically set isAdmin = true and role = #admin for all authenticated Internet Identity principals, removing any conditional checks that prevent admin access",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-33",
+      "summary": "Update the isAuthorized function in the authorization mixin to ensure it correctly recognizes users with isAdmin = true flag as authorized administrators, logging the authorization check result",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-34",
+      "summary": "Remove or bypass any role-based authorization checks in addProduct, updateProduct, and deleteProduct endpoints that could prevent authenticated users from performing admin operations, ensuring all authenticated principals can execute these functions",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-35",
+      "summary": "Add detailed debug logging throughout the authentication and authorization flow in the backend, including principal extraction, profile lookup, isAdmin flag status, role verification, and the final authorization decision for each admin endpoint call",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "WoodworkbyTanishas",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

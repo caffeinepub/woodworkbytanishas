@@ -1,0 +1,34 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Fix admin authentication to automatically grant administrator privileges to authenticated Internet Identity users",
+  "requirements": [
+    {
+      "id": "REQ-42",
+      "summary": "Verify that the frontend AdminPanel component correctly displays the admin interface and product management forms immediately after successful Internet Identity authentication without showing permission errors",
+      "acceptanceCriteria": [
+        "AdminPanel component displays 'Add New Product' form for authenticated users",
+        "No 'You don't have admin privileges' error message appears after login",
+        "Product management interface (add, edit, delete) is fully accessible",
+        "Authentication state properly triggers admin UI rendering"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/AdminPanel.tsx",
+          "operation": "modify",
+          "description": "Remove or simplify the admin privilege check to ensure all authenticated Internet Identity users can access the admin panel. Update the access control logic to show the full admin interface (Add New Product form, product list, edit/delete actions) immediately after authentication without requiring additional role verification. Remove any 'You don't have admin privileges' error states that block authenticated users. Ensure the component properly responds to authentication state changes from useInternetIdentity hook and displays the ProductForm and product management UI for all logged-in users."
+        },
+        {
+          "path": "frontend/src/pages/Login.tsx",
+          "operation": "modify",
+          "description": "Update the automatic redirect logic to ensure authenticated users are sent to the admin panel without additional privilege checks. Simplify or remove the admin role verification that may be blocking access after successful Internet Identity login. Ensure the page correctly handles the authentication flow and navigates to /admin for all authenticated principals."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Review and update the useIsCallerAdmin and useGetCallerUserRole hooks to ensure they correctly reflect the backend's updated authorization behavior where all authenticated users should be treated as admins. Adjust any caching or retry logic that might cause stale authorization states. Ensure query invalidation triggers properly after login to refresh admin status."
+        }
+      ]
+    }
+  ]
+}
