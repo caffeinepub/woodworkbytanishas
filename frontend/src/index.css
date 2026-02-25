@@ -7,19 +7,19 @@
         --radius: 0.5rem;
         
         /* Luxury Minimalist Color Palette - Light Mode */
-        --background: 0.98 0.01 40;        /* Warm white #FEFEFE */
-        --foreground: 0.15 0.02 30;        /* Matte black #1A1A1A */
+        --background: 0.98 0.01 40;        /* Warm white */
+        --foreground: 0.15 0.02 30;        /* Matte black */
         --card: 0.98 0.01 40;
         --card-foreground: 0.15 0.02 30;
         --popover: 0.98 0.01 40;
         --popover-foreground: 0.15 0.02 30;
         
         /* Primary: Walnut Brown */
-        --primary: 0.35 0.08 35;           /* Walnut brown #6B4423 */
+        --primary: 0.35 0.08 35;
         --primary-foreground: 0.98 0.01 40;
         
         /* Secondary: Beige */
-        --secondary: 0.95 0.02 45;         /* Beige #F5F1E8 */
+        --secondary: 0.95 0.02 45;
         --secondary-foreground: 0.35 0.08 35;
         
         --muted: 0.95 0.02 45;
@@ -34,6 +34,11 @@
         --input: 0.90 0.01 40;
         --ring: 0.35 0.08 35;
         
+        /* Admin panel specific */
+        --admin-bg: 0.96 0.01 42;
+        --sidebar-bg: 0.99 0.005 40;
+        --sidebar-border: 0.91 0.01 40;
+        
         --chart-1: 0.60 0.15 180;
         --chart-2: 0.65 0.12 140;
         --chart-3: 0.55 0.18 80;
@@ -42,19 +47,17 @@
     }
 
     .dark {
-        /* Dark Mode - Inverted with warm tones */
-        --background: 0.15 0.02 30;        /* Dark background */
-        --foreground: 0.95 0.02 45;        /* Light text */
+        /* Dark Mode */
+        --background: 0.15 0.02 30;
+        --foreground: 0.95 0.02 45;
         --card: 0.20 0.02 30;
         --card-foreground: 0.95 0.02 45;
         --popover: 0.18 0.02 30;
         --popover-foreground: 0.95 0.02 45;
         
-        /* Primary: Lighter walnut for dark mode */
         --primary: 0.75 0.06 40;
         --primary-foreground: 0.15 0.02 30;
         
-        /* Secondary: Darker beige */
         --secondary: 0.25 0.02 35;
         --secondary-foreground: 0.95 0.02 45;
         
@@ -69,6 +72,11 @@
         --border: 0.30 0.01 30;
         --input: 0.30 0.01 30;
         --ring: 0.65 0.06 40;
+        
+        /* Admin panel dark */
+        --admin-bg: 0.13 0.02 30;
+        --sidebar-bg: 0.17 0.02 30;
+        --sidebar-border: 0.25 0.01 30;
         
         --chart-1: 0.55 0.18 200;
         --chart-2: 0.60 0.14 160;
@@ -94,13 +102,13 @@
 @layer utilities {
     /* Premium animations */
     .animate-fade-in {
-        animation: fadeIn 0.6s ease-in-out;
+        animation: fadeIn 0.4s ease-in-out;
     }
     
     @keyframes fadeIn {
         from {
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(8px);
         }
         to {
             opacity: 1;

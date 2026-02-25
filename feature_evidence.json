@@ -2,12 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-verify-that-the-frontend-adminpanel-component-correctly-displays-the-admin-interface-and-product-management-forms-immediately-after-successful-internet-identity-authentication-without-showing-permission-errors",
-      "featureTitle": "Verify that the frontend AdminPanel component correctly displays the admin interface and product management forms immediately after successful Internet Identity authentication without showing permission errors",
+      "featureId": "feature-audit-and-fix-all-typescript-compilation-errors-in-the-frontend-that-caused-the-version-20-deployment-to-fail-ensure-frontend-src-hooks-usequeries-ts-frontend-src-components-adminproductssection-tsx-and-frontend-src-pages-collection-tsx-correctly-call-the-paginated-listproducts-offset-limit-endpoint-handle-the-products-total-response-shape-and-compile-without-type-errors",
+      "featureTitle": "Audit and fix all TypeScript compilation errors in the frontend that caused the Version 20 deployment to fail. Ensure `frontend/src/hooks/useQueries.ts`, `frontend/src/components/AdminProductsSection.tsx`, and `frontend/src/pages/Collection.tsx` correctly call the paginated `listProducts(offset, limit)` endpoint, handle the `{ products, total }` response shape, and compile without type errors.",
       "files": [
+        "frontend/src/components/AdminProductsSection.tsx",
         "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/AdminPanel.tsx",
-        "frontend/src/pages/Login.tsx"
+        "frontend/src/pages/Collection.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -19,7 +19,28 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-42"
+        "REQ-95"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-fix-the-authenticated-actor-construction-so-that-createactor-is-never-called-with-both-an-agent-parameter-and-agentoptions-simultaneously-when-an-authenticated-internet-identity-is-present-construct-a-single-httpagent-from-that-identity-and-pass-only-the-agent-parameter-when-unauthenticated-pass-only-agentoptions-with-the-anonymous-configuration-this-ensures-the-correct-non-anonymous-principal-is-forwarded-to-all-backend-calls-including-admin-endpoints-resolving-the-actor-not-available-error-in-productform",
+      "featureTitle": "Fix the authenticated actor construction so that `createActor` is never called with both an `agent` parameter and `agentOptions` simultaneously. When an authenticated Internet Identity is present, construct a single `HttpAgent` from that identity and pass only the `agent` parameter. When unauthenticated, pass only `agentOptions` with the anonymous configuration. This ensures the correct non-anonymous principal is forwarded to all backend calls including admin endpoints, resolving the 'Actor not available' error in `ProductForm`.",
+      "files": [
+        "frontend/src/components/ProductForm.tsx",
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "blob-storage@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-96"
       ],
       "confidence": "high"
     }

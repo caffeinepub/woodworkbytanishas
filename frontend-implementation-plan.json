@@ -1,32 +1,55 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Fix admin authentication to automatically grant administrator privileges to authenticated Internet Identity users",
+  "title": "Fix Version 20 Deployment Errors and Redeploy",
   "requirements": [
     {
-      "id": "REQ-42",
-      "summary": "Verify that the frontend AdminPanel component correctly displays the admin interface and product management forms immediately after successful Internet Identity authentication without showing permission errors",
+      "id": "REQ-95",
+      "summary": "Fix TypeScript compilation errors in frontend files that call the paginated listProducts endpoint",
       "acceptanceCriteria": [
-        "AdminPanel component displays 'Add New Product' form for authenticated users",
-        "No 'You don't have admin privileges' error message appears after login",
-        "Product management interface (add, edit, delete) is fully accessible",
-        "Authentication state properly triggers admin UI rendering"
+        "The frontend TypeScript build completes without errors.",
+        "`useQueries.ts` exports a hook that calls `listProducts(offset, limit)` and returns both `products` array and `total` count.",
+        "`AdminProductsSection.tsx` uses the paginated hook, fetches 10 products on mount, and shows a 'Load More' button that appends the next 10.",
+        "`Collection.tsx` uses the paginated hook, fetches 10 products on mount, and shows a 'Load More' button that appends the next 10.",
+        "The frontend bundle builds and serves correctly after deployment."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/pages/AdminPanel.tsx",
+          "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Remove or simplify the admin privilege check to ensure all authenticated Internet Identity users can access the admin panel. Update the access control logic to show the full admin interface (Add New Product form, product list, edit/delete actions) immediately after authentication without requiring additional role verification. Remove any 'You don't have admin privileges' error states that block authenticated users. Ensure the component properly responds to authentication state changes from useInternetIdentity hook and displays the ProductForm and product management UI for all logged-in users."
+          "description": "Fix the paginated products hook to correctly call `listProducts(offset, limit)` with bigint parameters and handle the `{ products: Product[]; total: bigint }` response shape. Ensure the hook signature matches the backend interface type `PaginatedProducts`. Remove any references to unbounded `getProducts` or `listProducts()` without parameters. Export a hook named `useListProducts` that accepts offset and limit as parameters and returns both the products array and total count for pagination."
         },
         {
-          "path": "frontend/src/pages/Login.tsx",
+          "path": "frontend/src/components/AdminProductsSection.tsx",
           "operation": "modify",
-          "description": "Update the automatic redirect logic to ensure authenticated users are sent to the admin panel without additional privilege checks. Simplify or remove the admin role verification that may be blocking access after successful Internet Identity login. Ensure the page correctly handles the authentication flow and navigates to /admin for all authenticated principals."
+          "description": "Update to use the corrected `useListProducts` hook from useQueries.ts with offset and limit parameters (as bigints). Fetch 10 products on component mount (offset 0n, limit 10n). Implement a 'Load More' button that increments the offset by 10 and appends the next batch of products. Display the total count from the hook result. Handle loading and error states for both initial fetch and pagination. Ensure all TypeScript types match the PaginatedProducts interface from backend.d.ts."
         },
+        {
+          "path": "frontend/src/pages/Collection.tsx",
+          "operation": "modify",
+          "description": "Update to use the corrected `useListProducts` hook from useQueries.ts with offset and limit parameters (as bigints). Fetch 10 products on component mount (offset 0n, limit 10n). Implement a 'Load More' button that increments the offset by 10 and appends the next batch of products to the displayed list. Preserve the existing client-side category filtering logic. Display the total count from the hook result. Handle loading and error states for both initial fetch and pagination. Ensure all TypeScript types match the PaginatedProducts interface from backend.d.ts."
+        }
+      ]
+    },
+    {
+      "id": "REQ-96",
+      "summary": "Fix authenticated actor construction to prevent 'Actor not available' errors in admin operations",
+      "acceptanceCriteria": [
+        "`createActor` is never invoked with both `agent` and `agentOptions` at the same time.",
+        "After a successful Internet Identity login, the actor is immediately available as a non-null reference.",
+        "Admin panel product add/edit/delete operations succeed without 'Actor not available' errors.",
+        "Unauthenticated (anonymous) actor is used when no identity is present."
+      ],
+      "file_operations": [
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Review and update the useIsCallerAdmin and useGetCallerUserRole hooks to ensure they correctly reflect the backend's updated authorization behavior where all authenticated users should be treated as admins. Adjust any caching or retry logic that might cause stale authorization states. Ensure query invalidation triggers properly after login to refresh admin status."
+          "description": "Audit all direct `createActor` calls in mutation hooks (useAddProduct, useUpdateProduct, useDeleteProduct, etc.). Ensure that when constructing an authenticated actor, only the `agent` parameter is passed to `createActor`, never both `agent` and `agentOptions` simultaneously. When the identity is present, create a single `HttpAgent` from that identity and pass it as the sole `agent` parameter. When unauthenticated, pass only `agentOptions` with anonymous configuration. Verify that the actor reference is non-null before calling backend methods and throw a clear error if unavailable."
+        },
+        {
+          "path": "frontend/src/components/ProductForm.tsx",
+          "operation": "modify",
+          "description": "Ensure the component correctly uses the mutation hooks from useQueries.ts (useAddProduct, useUpdateProduct) and handles their loading/error states. Verify that the 'Actor not available' error no longer occurs when submitting the form after login. Add user-facing error messages if the actor is unavailable. Ensure all backend calls are made through the corrected actor construction pattern from useQueries.ts."
         }
       ]
     }

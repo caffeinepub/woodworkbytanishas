@@ -55,7 +55,11 @@ export default {
                     3: 'oklch(var(--chart-3))',
                     4: 'oklch(var(--chart-4))',
                     5: 'oklch(var(--chart-5))'
-                }
+                },
+                // Admin panel tokens
+                'admin-bg': 'oklch(var(--admin-bg))',
+                'sidebar-bg': 'oklch(var(--sidebar-bg))',
+                'sidebar-border': 'oklch(var(--sidebar-border))',
             },
             borderRadius: {
                 lg: 'var(--radius)',

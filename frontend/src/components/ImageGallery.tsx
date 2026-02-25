@@ -1,78 +1,90 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type { ExternalBlob } from '../backend';
+import type { ImageId } from '../backend';
 
 interface ImageGalleryProps {
-  images: ExternalBlob[];
+  images: ImageId[];
   productName: string;
 }
 
-export default function ImageGallery({ images, productName }: ImageGalleryProps) {
-  const [selectedIndex, setSelectedIndex] = useState(0);
+function imageIdToUrl(imageId: ImageId): string {
+  try {
+    const blob = new Blob([new Uint8Array(imageId)], { type: 'image/jpeg' });
+    return URL.createObjectURL(blob);
+  } catch {
+    return '/assets/generated/product-dining-table.dim_800x600.png';
+  }
+}
 
-  if (!images || images.length === 0) {
+export default function ImageGallery({ images, productName }: ImageGalleryProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const imageUrls = images.map(imageIdToUrl);
+  const fallback = '/assets/generated/product-dining-table.dim_800x600.png';
+
+  if (imageUrls.length === 0) {
     return (
-      <div className="aspect-square bg-muted rounded-lg flex items-center justify-center">
-        <p className="text-muted-foreground">No images available</p>
+      <div className="aspect-square bg-muted rounded-2xl flex items-center justify-center">
+        <img src={fallback} alt={productName} className="w-full h-full object-cover rounded-2xl" />
       </div>
     );
   }
 
-  const handlePrevious = () => {
-    setSelectedIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
-
-  const handleNext = () => {
-    setSelectedIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
+  const prev = () => setCurrentIndex((i) => (i - 1 + imageUrls.length) % imageUrls.length);
+  const next = () => setCurrentIndex((i) => (i + 1) % imageUrls.length);
 
   return (
     <div className="space-y-4">
       {/* Main Image */}
-      <div className="relative aspect-square bg-muted rounded-lg overflow-hidden group">
+      <div className="relative aspect-square bg-muted rounded-2xl overflow-hidden group">
         <img
-          src={images[selectedIndex].getDirectURL()}
-          alt={`${productName} - Image ${selectedIndex + 1}`}
+          src={imageUrls[currentIndex]}
+          alt={`${productName} - Image ${currentIndex + 1}`}
           className="w-full h-full object-cover"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = fallback;
+          }}
         />
-        
-        {images.length > 1 && (
+        {imageUrls.length > 1 && (
           <>
             <button
-              onClick={handlePrevious}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-foreground p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              onClick={prev}
+              className="absolute left-3 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
               aria-label="Previous image"
             >
-              <ChevronLeft size={24} />
+              <ChevronLeft size={20} />
             </button>
             <button
-              onClick={handleNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-foreground p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              onClick={next}
+              className="absolute right-3 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
               aria-label="Next image"
             >
-              <ChevronRight size={24} />
+              <ChevronRight size={20} />
             </button>
           </>
         )}
       </div>
 
       {/* Thumbnails */}
-      {images.length > 1 && (
-        <div className="grid grid-cols-4 gap-4">
-          {images.map((image, index) => (
+      {imageUrls.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {imageUrls.map((url, index) => (
             <button
               key={index}
-              onClick={() => setSelectedIndex(index)}
-              className={`aspect-square rounded-lg overflow-hidden border-2 transition-all duration-200 ${
-                index === selectedIndex
+              onClick={() => setCurrentIndex(index)}
+              className={`shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                index === currentIndex
                   ? 'border-primary shadow-md'
-                  : 'border-transparent hover:border-muted-foreground/30'
+                  : 'border-transparent hover:border-muted-foreground/40'
               }`}
             >
               <img
-                src={image.getDirectURL()}
+                src={url}
                 alt={`${productName} thumbnail ${index + 1}`}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = fallback;
+                }}
               />
             </button>
           ))}

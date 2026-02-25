@@ -1,357 +1,349 @@
-import { useState, useEffect } from 'react';
-import { Loader2, Upload, X, AlertCircle, CheckCircle } from 'lucide-react';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Textarea } from './ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Switch } from './ui/switch';
-import { Button } from './ui/button';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useIsCallerAdmin } from '../hooks/useQueries';
-import { useActor } from '../hooks/useActor';
+import React, { useState } from 'react';
+import { Loader2, X, Upload, Lock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { toast } from 'sonner';
+import { useAddProduct, useUpdateProduct } from '../hooks/useQueries';
 import type { Product } from '../backend';
-import { ExternalBlob, WoodType } from '../backend';
+import { WoodType } from '../backend';
+import { compressImage } from '../utils/imageCompression';
 
 interface ProductFormProps {
   product?: Product;
-  onSubmit: (product: Product) => Promise<void>;
+  onSuccess: () => void;
   onCancel: () => void;
+  initialCategory?: string;
+  categoryLocked?: boolean;
 }
 
-export default function ProductForm({ product, onSubmit, onCancel }: ProductFormProps) {
-  const { identity } = useInternetIdentity();
-  const { data: isAdmin, isLoading: adminLoading } = useIsCallerAdmin();
-  const { actor, isFetching: actorFetching } = useActor();
-  
-  const [formData, setFormData] = useState<Partial<Product>>({
-    id: product?.id || '',
-    name: product?.name || '',
-    description: product?.description || '',
-    woodType: product?.woodType || WoodType.mangoWood,
-    category: product?.category || '',
-    finishInfo: product?.finishInfo || '',
-    isActive: product?.isActive ?? true,
-    imageUrls: product?.imageUrls || [],
-  });
+function generateId(): string {
+  return `product_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+}
+
+export default function ProductForm({
+  product,
+  onSuccess,
+  onCancel,
+  initialCategory,
+  categoryLocked,
+}: ProductFormProps) {
+  const isEditing = !!product;
+  const addProduct = useAddProduct();
+  const updateProduct = useUpdateProduct();
+
+  const [name, setName] = useState(product?.name ?? '');
+  const [description, setDescription] = useState(product?.description ?? '');
+  const [category, setCategory] = useState(product?.category ?? initialCategory ?? '');
+  const [woodType, setWoodType] = useState<WoodType>(product?.woodType ?? WoodType.mangoWood);
+  const [finishInfo, setFinishInfo] = useState(product?.finishInfo ?? '');
+  const [isActive, setIsActive] = useState(product?.isActive ?? true);
+  const [whatsappMessage, setWhatsappMessage] = useState(product?.whatsappMessage ?? '');
   const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [uploadProgress, setUploadProgress] = useState<number[]>([]);
+  const [existingImages, setExistingImages] = useState<Uint8Array[]>(
+    product?.imageUrls ? [...product.imageUrls] : []
+  );
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [authWarning, setAuthWarning] = useState<string | null>(null);
-
-  const isActorReady = !!actor && !actorFetching;
-
-  // Check authentication and authorization status
-  useEffect(() => {
-    console.log('🔍 [ProductForm] Auth check:', {
-      hasIdentity: !!identity,
-      principal: identity?.getPrincipal().toString(),
-      isAdmin,
-      adminLoading,
-      isActorReady,
-    });
-
-    if (!identity) {
-      setAuthWarning('⚠️ You are not logged in. Please log in to add products.');
-    } else if (actorFetching) {
-      setAuthWarning('⚠️ Initializing admin access... Please wait.');
-    } else if (!adminLoading && !isAdmin) {
-      setAuthWarning(`⚠️ You do not have admin privileges. Only admins can add products.`);
-    } else {
-      setAuthWarning(null);
-    }
-  }, [identity, isAdmin, adminLoading, actorFetching, isActorReady]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setImageFiles(Array.from(e.target.files));
-      setError(null);
+      setImageFiles(prev => [...prev, ...Array.from(e.target.files!)]);
     }
   };
 
-  const removeImage = (index: number) => {
-    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+  const removeNewImage = (index: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = (index: number) => {
+    setExistingImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    
-    console.log('🔍 [ProductForm] Form submission started');
-    console.log('🔍 [ProductForm] Authentication state:', {
-      hasIdentity: !!identity,
-      principal: identity?.getPrincipal().toString(),
-      isAdmin,
-      isActorReady,
-    });
-
-    // Pre-submission validation
-    if (!identity) {
-      const errorMsg = 'You must be logged in to add products. Please log in and try again.';
-      console.error('❌ [ProductForm] Not authenticated');
-      setError(errorMsg);
+    if (!name.trim()) {
+      toast.error('Product name is required');
       return;
     }
-
-    if (!isActorReady) {
-      const errorMsg = 'Admin access is still being initialized. Please wait a moment and try again.';
-      console.error('❌ [ProductForm] Actor not ready');
-      setError(errorMsg);
-      return;
-    }
-
-    if (!isAdmin) {
-      const errorMsg = `You do not have admin privileges. Only administrators can add products. Please log out and log back in, or contact the administrator.`;
-      console.error('❌ [ProductForm] Not authorized - admin status:', isAdmin);
-      setError(errorMsg);
+    if (!category.trim()) {
+      toast.error('Category is required');
       return;
     }
 
     setIsSubmitting(true);
+    setUploadProgress(0);
 
     try {
-      let imageUrls = formData.imageUrls || [];
-
-      if (imageFiles.length > 0) {
-        console.log('🔍 [ProductForm] Uploading images:', imageFiles.length);
-        const newImages = await Promise.all(
-          imageFiles.map(async (file, index) => {
-            const bytes = new Uint8Array(await file.arrayBuffer());
-            return ExternalBlob.fromBytes(bytes).withUploadProgress((percentage) => {
-              setUploadProgress((prev) => {
-                const newProgress = [...prev];
-                newProgress[index] = percentage;
-                return newProgress;
-              });
-            });
-          })
-        );
-        imageUrls = [...imageUrls, ...newImages];
-        console.log('✅ [ProductForm] Images uploaded successfully');
+      // Compress and convert new images to Uint8Array
+      const newImageArrays: Uint8Array[] = [];
+      for (let i = 0; i < imageFiles.length; i++) {
+        const file = imageFiles[i];
+        const compressed = await compressImage(file);
+        newImageArrays.push(compressed);
+        setUploadProgress(Math.round(((i + 1) / imageFiles.length) * 100));
       }
+
+      const allImages = [...existingImages, ...newImageArrays];
 
       const productData: Product = {
-        id: formData.id || `product-${Date.now()}`,
-        name: formData.name || '',
-        description: formData.description || '',
-        woodType: formData.woodType as WoodType,
-        category: formData.category || '',
-        imageUrls,
-        finishInfo: formData.finishInfo || '',
-        isActive: formData.isActive ?? true,
+        id: product?.id ?? generateId(),
+        name: name.trim(),
+        description: description.trim(),
+        category: category.trim(),
+        woodType,
+        finishInfo: finishInfo.trim(),
+        isActive,
+        imageUrls: allImages,
+        whatsappMessage: whatsappMessage.trim() || undefined,
       };
 
-      console.log('🔍 [ProductForm] Submitting product:', {
-        id: productData.id,
-        name: productData.name,
-        category: productData.category,
-        imageCount: productData.imageUrls.length,
-      });
-
-      await onSubmit(productData);
-      console.log('✅ [ProductForm] Product submitted successfully');
-    } catch (error: any) {
-      console.error('❌ [ProductForm] Submission error:', error);
-      console.error('❌ [ProductForm] Error details:', {
-        message: error?.message,
-        name: error?.name,
-        stack: error?.stack,
-      });
-
-      // Display user-friendly error message
-      let errorMessage = 'Failed to save product. Please try again.';
-      
-      if (error?.message) {
-        if (error.message.includes('not authenticated') || error.message.includes('log in')) {
-          errorMessage = '🔐 Authentication Error: Please log out and log in again, then try adding the product.';
-        } else if (error.message.includes('admin') || error.message.includes('Unauthorized') || error.message.includes('Authorization')) {
-          errorMessage = `🚫 Authorization Error: ${error.message}\n\nTry these steps:\n1. Log out completely\n2. Log back in\n3. Wait for admin access to initialize\n4. Try adding the product again\n\nIf the issue persists, contact the administrator.`;
-        } else if (error.message.includes('Actor not available')) {
-          errorMessage = '🔌 Connection Error: Please refresh the page and try again.';
-        } else if (error.message.includes('not initialized')) {
-          errorMessage = '⏳ Initialization Error: Admin access is still being set up. Please wait a few seconds and try again.';
-        } else {
-          errorMessage = `❌ Error: ${error.message}`;
-        }
+      if (isEditing) {
+        await updateProduct.mutateAsync({ productId: product!.id, product: productData });
+        toast.success('Product updated successfully');
+      } else {
+        await addProduct.mutateAsync(productData);
+        toast.success('Product added successfully');
       }
 
-      setError(errorMessage);
+      onSuccess();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to save product';
+      toast.error(msg);
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(0);
     }
   };
 
-  const isFormDisabled = isSubmitting || !identity || !isActorReady || !isAdmin;
-  const canSubmit = identity && isActorReady && isAdmin && !isSubmitting;
-
-  // Wood type options with proper labels
-  const woodTypeOptions = [
-    { value: WoodType.mangoWood, label: 'Mango Wood' },
-    { value: WoodType.acaciaWood, label: 'Acacia Wood' },
-    { value: WoodType.lineRange, label: 'Line Range' },
-    { value: WoodType.customisedProducts, label: 'Customized Products' },
-  ];
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-card p-6 rounded-lg shadow-md">
-      {/* Authentication Status */}
-      {identity && isActorReady && isAdmin && (
-        <Alert className="border-green-500 bg-green-50 dark:bg-green-950">
-          <CheckCircle className="h-4 w-4 text-green-600" />
-          <AlertTitle className="text-green-800 dark:text-green-200">Admin Access Verified</AlertTitle>
-          <AlertDescription className="text-green-700 dark:text-green-300">
-            You have full admin privileges. You can add, edit, and manage products.
-          </AlertDescription>
-        </Alert>
-      )}
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Name */}
+      <div className="space-y-1.5">
+        <Label htmlFor="name">Product Name *</Label>
+        <Input
+          id="name"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          placeholder="e.g. Mango Wood Dining Table"
+          disabled={isSubmitting}
+          required
+        />
+      </div>
 
-      {/* Authentication Warning */}
-      {authWarning && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Authentication Required</AlertTitle>
-          <AlertDescription>{authWarning}</AlertDescription>
-        </Alert>
-      )}
+      {/* Description */}
+      <div className="space-y-1.5">
+        <Label htmlFor="description">Description</Label>
+        <Textarea
+          id="description"
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+          placeholder="Describe the product..."
+          rows={3}
+          disabled={isSubmitting}
+        />
+      </div>
 
-      {/* Error Display */}
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription className="whitespace-pre-line">{error}</AlertDescription>
-        </Alert>
-      )}
-
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="name">Product Name *</Label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            placeholder="Enter product name"
-            required
-            disabled={isFormDisabled}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="description">Description *</Label>
-          <Textarea
-            id="description"
-            value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            placeholder="Enter product description"
-            rows={4}
-            required
-            disabled={isFormDisabled}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="woodType">Wood Type *</Label>
-            <Select
-              value={formData.woodType}
-              onValueChange={(value) => setFormData({ ...formData, woodType: value as WoodType })}
-              disabled={isFormDisabled}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select wood type" />
-              </SelectTrigger>
-              <SelectContent>
-                {woodTypeOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="category">Category *</Label>
+      {/* Category & Wood Type */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-1.5">
+          <Label htmlFor="category">
+            Category *
+            {categoryLocked && <Lock className="inline h-3 w-3 ml-1 text-muted-foreground" />}
+          </Label>
+          {categoryLocked ? (
             <Input
               id="category"
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              placeholder="e.g., Tables, Chairs, Cabinets"
-              required
-              disabled={isFormDisabled}
+              value={category}
+              readOnly
+              className="bg-muted cursor-not-allowed"
+              disabled={isSubmitting}
             />
-          </div>
-        </div>
-
-        <div>
-          <Label htmlFor="finishInfo">Finish Information</Label>
-          <Input
-            id="finishInfo"
-            value={formData.finishInfo}
-            onChange={(e) => setFormData({ ...formData, finishInfo: e.target.value })}
-            placeholder="e.g., Natural oil finish, Matte lacquer"
-            disabled={isFormDisabled}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="images">Product Images</Label>
-          <Input
-            id="images"
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleImageChange}
-            disabled={isFormDisabled}
-          />
-          {imageFiles.length > 0 && (
-            <div className="mt-2 space-y-2">
-              {imageFiles.map((file, index) => (
-                <div key={index} className="flex items-center justify-between bg-muted p-2 rounded">
-                  <span className="text-sm truncate">{file.name}</span>
-                  {uploadProgress[index] !== undefined && (
-                    <span className="text-sm text-muted-foreground">{uploadProgress[index]}%</span>
-                  )}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeImage(index)}
-                    disabled={isFormDisabled}
-                  >
-                    <X size={16} />
-                  </Button>
-                </div>
-              ))}
-            </div>
+          ) : (
+            <Input
+              id="category"
+              value={category}
+              onChange={e => setCategory(e.target.value)}
+              placeholder="e.g. Tables"
+              disabled={isSubmitting}
+              required
+            />
           )}
         </div>
-
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="isActive"
-            checked={formData.isActive}
-            onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
-            disabled={isFormDisabled}
-          />
-          <Label htmlFor="isActive">Active (visible to customers)</Label>
+        <div className="space-y-1.5">
+          <Label>Wood Type</Label>
+          <Select
+            value={woodType}
+            onValueChange={val => setWoodType(val as WoodType)}
+            disabled={isSubmitting}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={WoodType.mangoWood}>Mango Wood</SelectItem>
+              <SelectItem value={WoodType.acaciaWood}>Acacia Wood</SelectItem>
+              <SelectItem value={WoodType.lineRange}>Line Range</SelectItem>
+              <SelectItem value={WoodType.customisedProducts}>Customised Products</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      <div className="flex space-x-4">
-        <Button type="submit" disabled={!canSubmit} className="flex-1">
+      {/* Finish Info */}
+      <div className="space-y-1.5">
+        <Label htmlFor="finishInfo">Finish Information</Label>
+        <Input
+          id="finishInfo"
+          value={finishInfo}
+          onChange={e => setFinishInfo(e.target.value)}
+          placeholder="e.g. Natural oil finish, hand-rubbed"
+          disabled={isSubmitting}
+        />
+      </div>
+
+      {/* WhatsApp Message */}
+      <div className="space-y-1.5">
+        <Label htmlFor="whatsappMessage">WhatsApp Message (optional)</Label>
+        <Textarea
+          id="whatsappMessage"
+          value={whatsappMessage}
+          onChange={e => setWhatsappMessage(e.target.value)}
+          placeholder="Custom message for WhatsApp enquiry..."
+          rows={2}
+          disabled={isSubmitting}
+        />
+      </div>
+
+      {/* Active Status */}
+      <div className="flex items-center gap-3">
+        <Switch
+          id="isActive"
+          checked={isActive}
+          onCheckedChange={setIsActive}
+          disabled={isSubmitting}
+        />
+        <Label htmlFor="isActive">Active (visible to customers)</Label>
+      </div>
+
+      {/* Existing Images */}
+      {existingImages.length > 0 && (
+        <div className="space-y-1.5">
+          <Label>Current Images</Label>
+          <div className="flex flex-wrap gap-2">
+            {existingImages.map((img, i) => {
+              const url = URL.createObjectURL(
+                new Blob([new Uint8Array(img.buffer as ArrayBuffer)], { type: 'image/jpeg' })
+              );
+              return (
+                <div
+                  key={i}
+                  className="relative w-20 h-20 rounded-lg overflow-hidden border border-border"
+                >
+                  <img src={url} alt={`Image ${i + 1}`} className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeExistingImage(i)}
+                    disabled={isSubmitting}
+                    className="absolute top-0.5 right-0.5 bg-destructive text-destructive-foreground rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* New Images */}
+      <div className="space-y-1.5">
+        <Label>Add Images</Label>
+        <label className="flex items-center gap-2 cursor-pointer border-2 border-dashed border-border rounded-lg p-4 hover:bg-secondary/30 transition-colors">
+          <Upload className="h-5 w-5 text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">Click to upload images</span>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={handleImageChange}
+            disabled={isSubmitting}
+          />
+        </label>
+        {imageFiles.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            {imageFiles.map((file, i) => (
+              <div
+                key={i}
+                className="relative w-20 h-20 rounded-lg overflow-hidden border border-border"
+              >
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt={file.name}
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeNewImage(i)}
+                  disabled={isSubmitting}
+                  className="absolute top-0.5 right-0.5 bg-destructive text-destructive-foreground rounded-full p-0.5"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Upload Progress */}
+      {isSubmitting && imageFiles.length > 0 && uploadProgress > 0 && (
+        <div className="space-y-1">
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>Processing images...</span>
+            <span>{uploadProgress}%</span>
+          </div>
+          <div className="w-full bg-secondary rounded-full h-1.5">
+            <div
+              className="bg-primary h-1.5 rounded-full transition-all"
+              style={{ width: `${uploadProgress}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Actions */}
+      <div className="flex gap-3 pt-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isSubmitting}
+          className="flex-1"
+        >
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isSubmitting} className="flex-1">
           {isSubmitting ? (
             <>
-              <Loader2 className="animate-spin mr-2" size={16} />
-              {product ? 'Updating...' : 'Adding...'}
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              {isEditing ? 'Updating...' : 'Adding...'}
             </>
+          ) : isEditing ? (
+            'Update Product'
           ) : (
-            <>{product ? 'Update Product' : 'Add Product'}</>
+            'Add Product'
           )}
-        </Button>
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-          Cancel
         </Button>
       </div>
     </form>

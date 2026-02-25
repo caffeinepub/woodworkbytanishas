@@ -2,7 +2,6 @@ import { Link, useNavigate } from '@tanstack/react-router';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useGetCallerUserRole } from '../hooks/useQueries';
 import { useQueryClient } from '@tanstack/react-query';
 import FloatingWhatsApp from './FloatingWhatsApp';
 import { SiFacebook, SiInstagram } from 'react-icons/si';
@@ -10,11 +9,9 @@ import { SiFacebook, SiInstagram } from 'react-icons/si';
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { identity, clear } = useInternetIdentity();
-  const { data: userRole, isFetched: roleFetched } = useGetCallerUserRole();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const isAuthenticated = !!identity;
-  const isAdmin = roleFetched && userRole === 'admin';
 
   const handleLogout = async () => {
     await clear();
@@ -55,7 +52,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   {link.label}
                 </Link>
               ))}
-              {isAdmin && (
+              {isAuthenticated && (
                 <Link
                   to="/admin"
                   className="text-base font-medium text-foreground/80 hover:text-primary transition-colors duration-200"
@@ -106,7 +103,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     {link.label}
                   </Link>
                 ))}
-                {isAdmin && (
+                {isAuthenticated && (
                   <Link
                     to="/admin"
                     onClick={() => setMobileMenuOpen(false)}

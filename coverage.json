@@ -1,56 +1,48 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T09:36:19.847Z",
+  "generatedAt": "2026-02-25T12:17:52.436Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 1,
+    "total": 3,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-38",
-        "summary": "Modify the backend user profile initialization in the getOrCreateProfile function to automatically set isAdmin = true and role = #admin for all authenticated Internet Identity principals, removing any conditional checks that prevent admin access",
+        "id": "REQ-94",
+        "summary": "Audit and fix all compilation and runtime errors in `backend/main.mo` that caused the Version 20 deployment to fail. Ensure the paginated `listProducts(offset: Nat, limit: Nat)` endpoint compiles cleanly, has no authorization guard, returns `{ products: [Product]; total: Nat }`, and does not exceed the IC message size limit. Remove any unbounded `listProducts` call that returns all products at once.",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-39",
-        "summary": "Update the isAuthorized function in the authorization mixin to ensure it correctly recognizes users with isAdmin = true flag as authorized administrators, logging the authorization check result",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-40",
-        "summary": "Remove or bypass any role-based authorization checks in addProduct, updateProduct, and deleteProduct endpoints that could prevent authenticated users from performing admin operations, ensuring all authenticated principals can execute these functions",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-41",
-        "summary": "Add detailed debug logging throughout the authentication and authorization flow in the backend, including principal extraction, profile lookup, isAdmin flag status, role verification, and the final authorization decision for each admin endpoint call",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-42",
-        "summary": "Verify that the frontend AdminPanel component correctly displays the admin interface and product management forms immediately after successful Internet Identity authentication without showing permission errors",
+        "id": "REQ-95",
+        "summary": "Audit and fix all TypeScript compilation errors in the frontend that caused the Version 20 deployment to fail. Ensure `frontend/src/hooks/useQueries.ts`, `frontend/src/components/AdminProductsSection.tsx`, and `frontend/src/pages/Collection.tsx` correctly call the paginated `listProducts(offset, limit)` endpoint, handle the `{ products, total }` response shape, and compile without type errors.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/pages/AdminPanel.tsx",
-          "frontend/src/pages/Login.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/AdminProductsSection.tsx",
+          "frontend/src/pages/Collection.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/pages/AdminPanel.tsx",
-          "frontend/src/pages/Login.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/AdminProductsSection.tsx",
+          "frontend/src/pages/Collection.tsx"
+        ]
+      },
+      {
+        "id": "REQ-96",
+        "summary": "Fix the authenticated actor construction so that `createActor` is never called with both an `agent` parameter and `agentOptions` simultaneously. When an authenticated Internet Identity is present, construct a single `HttpAgent` from that identity and pass only the `agent` parameter. When unauthenticated, pass only `agentOptions` with the anonymous configuration. This ensures the correct non-anonymous principal is forwarded to all backend calls including admin endpoints, resolving the 'Actor not available' error in `ProductForm`.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/ProductForm.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/ProductForm.tsx"
         ]
       }
     ]
@@ -61,9 +53,10 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/components/AdminProductsSection.tsx",
+    "frontend/src/components/ProductForm.tsx",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/AdminPanel.tsx",
-    "frontend/src/pages/Login.tsx",
+    "frontend/src/pages/Collection.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

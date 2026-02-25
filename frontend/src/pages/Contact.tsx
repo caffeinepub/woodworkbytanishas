@@ -4,7 +4,8 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { Button } from '../components/ui/button';
-import { Loader2, Mail, MapPin, MessageCircle, CheckCircle } from 'lucide-react';
+import { Loader2, Mail, MapPin, MessageCircle, CheckCircle, ExternalLink } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ export default function Contact() {
     message: '',
   });
   const [showSuccess, setShowSuccess] = useState(false);
+  const [whatsappUrl, setWhatsappUrl] = useState<string | null>(null);
 
   const { mutateAsync: submitForm, isPending } = useSubmitContactForm();
 
@@ -20,21 +22,36 @@ export default function Contact() {
     e.preventDefault();
 
     try {
-      await submitForm({
+      // Submit to backend — backend returns the WhatsApp URL
+      const returnedUrl = await submitForm({
+        id: `contact-${Date.now()}`,
         ...formData,
         timestamp: BigInt(Date.now() * 1000000),
       });
 
+      // Build WhatsApp URL client-side with full details (more reliable than backend URL)
+      const message = `Contact Form Submission\n\nName: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`;
+      const encodedMessage = encodeURIComponent(message);
+      const waUrl = returnedUrl || `https://wa.me/919828288383?text=${encodedMessage}`;
+
+      // Open WhatsApp in new tab
+      window.open(waUrl, '_blank');
+
+      setWhatsappUrl(waUrl);
       setShowSuccess(true);
       setFormData({ name: '', email: '', message: '' });
+      toast.success('Message sent! Opening WhatsApp...');
 
-      setTimeout(() => setShowSuccess(false), 5000);
-    } catch (error) {
-      console.error('Error submitting contact form:', error);
+      setTimeout(() => {
+        setShowSuccess(false);
+        setWhatsappUrl(null);
+      }, 8000);
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to send message. Please try again.');
     }
   };
 
-  const whatsappUrl = 'https://wa.me/?text=Hello, I would like to get in touch with WoodworkbyTanishas.';
+  const directWhatsappUrl = 'https://wa.me/919828288383?text=Hello%2C%20I%20would%20like%20to%20get%20in%20touch%20with%20WoodworkbyTanishas.';
 
   return (
     <div className="py-12">
@@ -87,12 +104,12 @@ export default function Contact() {
                   <div>
                     <h3 className="font-semibold text-foreground mb-1">WhatsApp</h3>
                     <a
-                      href={whatsappUrl}
+                      href={directWhatsappUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-muted-foreground hover:text-primary transition-colors"
                     >
-                      Chat with us on WhatsApp
+                      +91 9828288383
                     </a>
                   </div>
                 </div>
@@ -111,11 +128,24 @@ export default function Contact() {
             <h2 className="text-2xl font-serif font-bold text-foreground mb-6">Send us a Message</h2>
 
             {showSuccess && (
-              <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-center space-x-3">
-                <CheckCircle className="text-green-600 dark:text-green-400" size={20} />
-                <p className="text-green-800 dark:text-green-200 text-sm font-medium">
-                  Message sent successfully! We'll get back to you soon.
-                </p>
+              <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg space-y-3">
+                <div className="flex items-center space-x-3">
+                  <CheckCircle className="text-green-600 dark:text-green-400 shrink-0" size={20} />
+                  <p className="text-green-800 dark:text-green-200 text-sm font-medium">
+                    Message saved! WhatsApp has been opened with your details.
+                  </p>
+                </div>
+                {whatsappUrl && (
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-green-700 dark:text-green-300 hover:underline font-medium"
+                  >
+                    <ExternalLink size={14} />
+                    Open WhatsApp again
+                  </a>
+                )}
               </div>
             )}
 
@@ -152,14 +182,17 @@ export default function Contact() {
                 />
               </div>
 
-              <Button type="submit" disabled={isPending} className="w-full">
+              <Button type="submit" disabled={isPending} className="w-full gap-2">
                 {isPending ? (
                   <>
-                    <Loader2 className="animate-spin mr-2" size={18} />
+                    <Loader2 className="animate-spin" size={18} />
                     Sending...
                   </>
                 ) : (
-                  'Send Message'
+                  <>
+                    <MessageCircle size={18} />
+                    Send Message & Open WhatsApp
+                  </>
                 )}
               </Button>
             </form>

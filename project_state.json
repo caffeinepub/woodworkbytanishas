@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 15,
-  "summary": "Premium minimalist furniture website for WoodworkbyTanishas (Jodhpur, Rajasthan), featuring luxury design, inquiry-based product catalog with wood categories, WhatsApp integration, and admin panel",
+  "projectStateVersion": 43,
+  "summary": "Premium minimalist furniture website for WoodworkbyTanishas (Jodhpur, Rajasthan), featuring luxury design, inquiry-based product catalog with wood categories, WhatsApp integration. Authentication uses custom admin login (username: Harsh Rawal, password: Harsh@0808) and customer account registration. Admin panel loads immediately after login. Fixing 'Actor not available - please ensure you are logged in' error when saving products in the admin panel by ensuring the authenticated actor is correctly constructed and available before form submission.",
   "architectural_notes": [
     "Luxury minimalist design with neutral earthy palette (beige, warm white, walnut brown, matte black)",
     "Mobile-first responsive design with smooth scrolling and premium animations",
@@ -10,11 +10,13 @@
     "SEO optimized structure with fast loading prioritized",
     "Admin authentication fixed to properly recognize Internet Identity login and grant access to Add Product interface",
     "Customization requests are sent directly to WhatsApp +91 9828288383 with pre-filled product details",
-    "Site owner requires super admin role with full CMS and product management permissions"
+    "Site owner requires super admin role with full CMS and product management permissions",
+    "Product images stored as base64 in canister with client-side compression before storage; multiple images per product supported",
+    "Authentication system transitioning from Internet Identity to custom username/password: admin (Harsh Rawal / Harsh@0808) + customer registration with email/password"
   ],
   "known_issues": [
-    "Admin panel Add Product functionality still not working after authentication fix attempt",
-    "Currently logged-in user does not have admin privileges despite authentication being successful"
+    "'Actor not available - please ensure you are logged in' error appears when saving products in admin panel — authenticated actor not properly initialized or passed to addProduct call",
+    "Version 20 deployment failed — fix and redeploy requested"
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -207,6 +209,254 @@
       "title": "Verify that the frontend AdminPanel component correctly displays the admin interface and product management forms immediately after successful Internet Identity authentication without showing permission errors",
       "reqIds": [
         "REQ-42"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-all-label-for-attribute-mismatches-in-the-productform-component-so-that-every-label-s-htmlfor-value-exactly-matches-the-id-of-its-associated-form-field-resolving-the-two-incorrect-use-of-label-for-form-element-devtools-issues-panel-errors-shown-in-the-screenshot",
+      "title": "Fix all `<label for>` attribute mismatches in the `ProductForm` component so that every label's `htmlFor` value exactly matches the `id` of its associated form field, resolving the two 'Incorrect use of label for=FORM_ELEMENT' DevTools Issues panel errors shown in the screenshot.",
+      "reqIds": [
+        "REQ-50"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-completely-rebuild-the-adminpanel-page-frontend-src-pages-adminpanel-tsx-with-a-new-premium-luxury-admin-interface-the-panel-must-1-show-the-full-admin-interface-immediately-after-internet-identity-login-with-no-blocking-error-ui-for-authenticated-users-2-include-a-sidebar-navigation-with-sections-dashboard-products-categories-settings-3-apply-the-woodworkbytanishas-earthy-luxury-aesthetic-beige-warm-white-walnut-brown-matte-black-with-elegant-spacing-and-premium-typography",
+      "title": "Completely rebuild the AdminPanel page (frontend/src/pages/AdminPanel.tsx) with a new premium, luxury admin interface. The panel must: (1) show the full admin interface immediately after Internet Identity login with no blocking error UI for authenticated users; (2) include a sidebar navigation with sections: Dashboard, Products, Categories, Settings; (3) apply the WoodworkbyTanishas earthy luxury aesthetic (beige, warm white, walnut brown, matte black) with elegant spacing and premium typography.",
+      "reqIds": [
+        "REQ-54"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-admin-dashboard-section-inside-adminpanel-with-analytics-overview-cards-displaying-total-products-active-products-inactive-products-products-per-category-one-card-per-category-recent-customization-requests-last-5-showing-name-product-type-timestamp-and-total-contact-form-submissions-cards-must-use-a-clean-modern-design-with-icons-numbers-and-labels",
+      "title": "Implement the Admin Dashboard section inside AdminPanel with analytics overview cards displaying: Total Products, Active Products, Inactive Products, Products per Category (one card per category), Recent Customization Requests (last 5, showing name/product type/timestamp), and Total Contact Form Submissions. Cards must use a clean, modern design with icons, numbers, and labels.",
+      "reqIds": [
+        "REQ-55"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-products-management-section-in-the-admin-panel-with-full-add-edit-delete-capabilities-product-form-must-include-name-description-wood-type-category-finish-info-whatsapp-message-override-field-active-inactive-toggle-and-multiple-image-upload-images-must-be-compressed-client-side-before-encoding-to-base64-previewed-before-upload-individually-deletable-replaceable-the-product-list-must-show-all-products-with-thumbnail-name-category-active-status-and-edit-delete-actions",
+      "title": "Implement the Products management section in the admin panel with full add/edit/delete capabilities. Product form must include: name, description, wood type, category, finish info, WhatsApp message override field, active/inactive toggle, and multiple image upload. Images must be: compressed client-side before encoding to base64, previewed before upload, individually deletable/replaceable. The product list must show all products with thumbnail, name, category, active status, and edit/delete actions.",
+      "reqIds": [
+        "REQ-56"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-categories-management-section-in-the-admin-panel-allowing-the-admin-to-view-and-manage-the-four-wood-categories-mango-wood-acacia-wood-line-range-customised-products-display-each-category-with-its-product-count-and-allow-the-admin-to-filter-and-view-products-per-category-from-within-the-admin-panel",
+      "title": "Implement the Categories management section in the admin panel, allowing the admin to view and manage the four wood categories (Mango Wood, Acacia Wood, Line Range, Customised Products). Display each category with its product count and allow the admin to filter and view products per category from within the admin panel.",
+      "reqIds": [
+        "REQ-57"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-react-query-hooks-in-frontend-src-hooks-usequeries-ts-to-add-a-usegetanalyticssummary-hook-that-calls-the-new-getanalyticssummary-backend-endpoint-and-update-existing-product-hooks-to-support-the-new-isactive-and-whatsappmessage-fields-in-create-update-mutations",
+      "title": "Update the React Query hooks in frontend/src/hooks/useQueries.ts to add a useGetAnalyticsSummary hook that calls the new getAnalyticsSummary backend endpoint, and update existing product hooks to support the new isActive and whatsappMessage fields in create/update mutations.",
+      "reqIds": [
+        "REQ-58"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-components-adminproductssection-tsx-and-frontend-src-components-productform-tsx-remove-any-frontend-side-admin-privilege-checks-or-role-guards-that-prevent-the-add-edit-delete-product-ui-from-rendering-or-submitting-for-authenticated-users-the-only-gate-should-be-whether-the-user-is-logged-in-non-anonymous",
+      "title": "In `frontend/src/components/AdminProductsSection.tsx` and `frontend/src/components/ProductForm.tsx`, remove any frontend-side admin privilege checks or role guards that prevent the add/edit/delete product UI from rendering or submitting for authenticated users. The only gate should be whether the user is logged in (non-anonymous).",
+      "reqIds": [
+        "REQ-63"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-collection-page-frontend-src-pages-collection-tsx-and-the-admin-products-section-frontend-src-components-adminproductssection-tsx-to-use-the-new-paginated-listproducts-endpoint-display-10-products-initially-and-show-a-load-more-button-that-fetches-the-next-10-products-and-appends-them-to-the-existing-list-the-load-more-button-must-be-hidden-when-all-products-have-been-loaded",
+      "title": "Update the Collection page (`frontend/src/pages/Collection.tsx`) and the admin Products section (`frontend/src/components/AdminProductsSection.tsx`) to use the new paginated `listProducts` endpoint. Display 10 products initially and show a 'Load More' button that fetches the next 10 products and appends them to the existing list. The 'Load More' button must be hidden when all products have been loaded.",
+      "reqIds": [
+        "REQ-65"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-the-admin-panel-categories-section-frontend-src-components-admincategoriessection-tsx-when-a-category-card-is-selected-and-its-detail-view-is-shown-add-an-add-product-to-this-category-button-clicking-this-button-must-open-the-product-form-same-form-used-in-the-products-section-with-the-category-field-pre-filled-and-locked-to-the-selected-category",
+      "title": "In the admin panel Categories section (`frontend/src/components/AdminCategoriesSection.tsx`), when a category card is selected and its detail view is shown, add an 'Add Product to this Category' button. Clicking this button must open the product form (same form used in the Products section) with the category field pre-filled and locked to the selected category.",
+      "reqIds": [
+        "REQ-66"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-contact-page-frontend-src-pages-contact-tsx-so-that-after-a-successful-form-submission-the-page-automatically-opens-whatsapp-with-the-pre-filled-message-url-returned-by-the-backend-targeting-91-9828288383-in-addition-to-showing-the-existing-success-confirmation-message",
+      "title": "Update the Contact page (`frontend/src/pages/Contact.tsx`) so that after a successful form submission, the page automatically opens WhatsApp with the pre-filled message URL returned by the backend (targeting +91 9828288383), in addition to showing the existing success confirmation message.",
+      "reqIds": [
+        "REQ-68"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-customize-page-frontend-src-pages-customize-tsx-so-that-customization-requests-are-saved-to-the-backend-via-the-submitcustomizationrequest-mutation-and-also-sent-to-whatsapp-91-9828288383-with-a-pre-filled-message-containing-customer-name-phone-email-product-type-wood-type-dimensions-finish-and-any-additional-notes-both-actions-must-happen-on-form-submission",
+      "title": "Update the Customize page (`frontend/src/pages/Customize.tsx`) so that customization requests are saved to the backend via the `submitCustomizationRequest` mutation AND also sent to WhatsApp (+91 9828288383) with a pre-filled message containing: customer name, phone, email, product type, wood type, dimensions, finish, and any additional notes. Both actions must happen on form submission.",
+      "reqIds": [
+        "REQ-69"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-src-pages-collection-tsx-to-use-the-new-paginated-listproducts-offset-limit-endpoint-on-initial-load-fetch-the-first-10-products-offset-0-limit-10-show-a-load-more-button-below-the-product-grid-that-fetches-the-next-10-products-offset-currentcount-limit-10-and-appends-them-to-the-existing-list-hide-the-load-more-button-when-currentcount-total-all-products-have-been-loaded",
+      "title": "Update `frontend/src/pages/Collection.tsx` to use the new paginated `listProducts(offset, limit)` endpoint. On initial load, fetch the first 10 products (`offset=0, limit=10`). Show a 'Load More' button below the product grid that fetches the next 10 products (`offset=currentCount, limit=10`) and appends them to the existing list. Hide the 'Load More' button when `currentCount >= total` (all products have been loaded).",
+      "reqIds": [
+        "REQ-72"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-src-components-adminproductssection-tsx-to-use-the-new-paginated-listproducts-offset-limit-endpoint-on-initial-load-fetch-10-products-show-a-load-more-button-that-appends-the-next-10-hide-the-button-when-all-products-are-loaded",
+      "title": "Update `frontend/src/components/AdminProductsSection.tsx` to use the new paginated `listProducts(offset, limit)` endpoint. On initial load fetch 10 products; show a 'Load More' button that appends the next 10. Hide the button when all products are loaded.",
+      "reqIds": [
+        "REQ-73"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-usegetproducts-or-equivalent-react-query-hook-in-frontend-src-hooks-usequeries-ts-to-call-the-paginated-listproducts-offset-limit-endpoint-the-hook-must-support-an-offset-parameter-return-both-the-products-array-and-total-count-and-support-appending-pages-for-the-load-more-pattern-used-in-collection-and-adminproductssection",
+      "title": "Update the `useGetProducts` (or equivalent) React Query hook in `frontend/src/hooks/useQueries.ts` to call the paginated `listProducts(offset, limit)` endpoint. The hook must support an `offset` parameter, return both the `products` array and `total` count, and support appending pages for the 'Load More' pattern used in Collection and AdminProductsSection.",
+      "reqIds": [
+        "REQ-74"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-src-components-adminproductssection-tsx-to-use-the-paginated-listproducts-offset-limit-endpoint-instead-of-the-unbounded-listproducts-call-on-initial-load-fetch-10-products-offset-0-limit-10-show-a-load-more-button-below-the-product-list-that-fetches-the-next-10-products-offset-currentcount-limit-10-and-appends-them-to-the-existing-list-hide-the-load-more-button-when-currentcount-total-all-products-have-been-loaded-this-fixes-the-ic0504-payload-size-error-4-555-808-bytes-3-145-728-limit-shown-in-the-screenshot",
+      "title": "Update `frontend/src/components/AdminProductsSection.tsx` to use the paginated `listProducts(offset, limit)` endpoint instead of the unbounded `listProducts` call. On initial load, fetch 10 products (`offset=0, limit=10`). Show a 'Load More' button below the product list that fetches the next 10 products (`offset=currentCount, limit=10`) and appends them to the existing list. Hide the 'Load More' button when `currentCount >= total` (all products have been loaded). This fixes the IC0504 payload size error (4,555,808 bytes > 3,145,728 limit) shown in the screenshot.",
+      "reqIds": [
+        "REQ-76"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-rewrite-frontend-src-pages-adminpanel-tsx-to-remove-any-blocking-initialization-sequence-e-g-awaiting-getanalyticssummary-listproducts-or-any-other-backend-call-before-rendering-the-panel-must-render-the-full-sidebar-main-content-area-immediately-after-the-user-is-authenticated-non-anonymous-with-no-loading-spinner-or-initializing-admin-panel-gate-the-page-must-never-show-a-full-page-loader-that-can-hang-indefinitely",
+      "title": "Rewrite `frontend/src/pages/AdminPanel.tsx` to remove any blocking initialization sequence (e.g., awaiting `getAnalyticsSummary`, `listProducts`, or any other backend call before rendering). The panel must render the full sidebar + main content area immediately after the user is authenticated (non-anonymous), with no loading spinner or 'Initializing admin panel...' gate. The page must never show a full-page loader that can hang indefinitely.",
+      "reqIds": [
+        "REQ-77"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-pages-adminpanel-tsx-make-each-section-dashboard-products-categories-fetch-its-own-data-independently-and-lazily-data-for-a-section-is-only-fetched-when-the-user-navigates-to-that-section-each-section-must-show-its-own-inline-loading-state-skeleton-or-spinner-while-its-data-loads-completely-isolated-from-other-sections",
+      "title": "In `frontend/src/pages/AdminPanel.tsx`, make each section (Dashboard, Products, Categories) fetch its own data independently and lazily — data for a section is only fetched when the user navigates to that section. Each section must show its own inline loading state (skeleton or spinner) while its data loads, completely isolated from other sections.",
+      "reqIds": [
+        "REQ-78"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-pages-adminpanel-tsx-and-all-admin-sub-components-admindashboard-tsx-adminproductssection-tsx-admincategoriessection-tsx-wrap-every-backend-call-with-error-handling-and-a-timeout-so-that-if-getanalyticssummary-listproducts-or-any-other-call-fails-or-does-not-respond-within-15-seconds-the-section-shows-a-graceful-error-fallback-state-e-g-could-not-load-data-please-try-again-instead-of-hanging-indefinitely",
+      "title": "In `frontend/src/pages/AdminPanel.tsx` and all admin sub-components (`AdminDashboard.tsx`, `AdminProductsSection.tsx`, `AdminCategoriesSection.tsx`), wrap every backend call with error handling and a timeout so that if `getAnalyticsSummary`, `listProducts`, or any other call fails or does not respond within 15 seconds, the section shows a graceful error/fallback state (e.g., 'Could not load data. Please try again.') instead of hanging indefinitely.",
+      "reqIds": [
+        "REQ-79"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-rewrite-frontend-src-pages-adminpanel-tsx-so-it-never-shows-a-full-page-initializing-admin-panel-spinner-the-component-must-render-the-full-sidebar-main-content-area-immediately-once-the-user-is-authenticated-non-anonymous-with-zero-blocking-backend-calls-before-first-render-remove-any-useeffect-or-initialization-sequence-that-awaits-getanalyticssummary-listproducts-or-any-other-backend-call-before-revealing-the-ui",
+      "title": "Rewrite `frontend/src/pages/AdminPanel.tsx` so it never shows a full-page 'Initializing admin panel...' spinner. The component must render the full sidebar + main content area immediately once the user is authenticated (non-anonymous), with zero blocking backend calls before first render. Remove any `useEffect` or initialization sequence that awaits `getAnalyticsSummary`, `listProducts`, or any other backend call before revealing the UI.",
+      "reqIds": [
+        "REQ-80"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-pages-adminpanel-tsx-implement-lazy-per-section-data-fetching-the-dashboard-section-fetches-analytics-only-when-the-user-navigates-to-dashboard-the-products-section-fetches-the-product-list-only-when-navigated-to-and-the-categories-section-fetches-category-data-only-when-navigated-to-each-section-must-display-its-own-inline-skeleton-spinner-while-its-data-loads-completely-isolated-from-other-sections",
+      "title": "In `frontend/src/pages/AdminPanel.tsx`, implement lazy, per-section data fetching: the Dashboard section fetches analytics only when the user navigates to Dashboard, the Products section fetches the product list only when navigated to, and the Categories section fetches category data only when navigated to. Each section must display its own inline skeleton/spinner while its data loads, completely isolated from other sections.",
+      "reqIds": [
+        "REQ-81"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-pages-adminpanel-tsx-and-all-admin-sub-components-admindashboard-tsx-adminproductssection-tsx-admincategoriessection-tsx-wrap-every-backend-call-with-a-15-second-timeout-and-error-handling-if-any-call-getanalyticssummary-listproducts-or-others-fails-or-does-not-respond-within-15-seconds-the-affected-section-must-show-a-graceful-error-state-e-g-could-not-load-data-please-try-again-with-a-retry-button-instead-of-hanging-indefinitely",
+      "title": "In `frontend/src/pages/AdminPanel.tsx` and all admin sub-components (`AdminDashboard.tsx`, `AdminProductsSection.tsx`, `AdminCategoriesSection.tsx`), wrap every backend call with a 15-second timeout and error handling. If any call — `getAnalyticsSummary`, `listProducts`, or others — fails or does not respond within 15 seconds, the affected section must show a graceful error state (e.g., 'Could not load data. Please try again.' with a retry button) instead of hanging indefinitely.",
+      "reqIds": [
+        "REQ-82"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-hooks-useactor-ts-or-wherever-createactor-is-invoked-audit-and-fix-the-actor-construction-so-that-when-an-authenticated-internet-identity-is-present-the-actor-is-built-from-that-identity-s-agent-and-stored-returned-synchronously-as-a-stable-non-null-reference-ensure-the-actor-is-never-returned-as-null-or-undefined-after-a-successful-login-if-the-identity-is-available-at-hook-mount-time-construct-the-actor-immediately-without-waiting-for-any-additional-async-trigger",
+      "title": "In `frontend/src/hooks/useActor.ts` (or wherever `createActor` is invoked), audit and fix the actor construction so that when an authenticated Internet Identity is present the actor is built from that identity's agent and stored/returned synchronously as a stable, non-null reference. Ensure the actor is never returned as `null` or `undefined` after a successful login. If the identity is available at hook mount time, construct the actor immediately without waiting for any additional async trigger.",
+      "reqIds": [
+        "REQ-83"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-components-productform-tsx-add-a-guard-that-checks-whether-the-actor-is-available-before-the-form-s-submit-handler-fires-if-the-actor-is-not-yet-ready-display-a-clear-inline-message-e-g-authenticating-please-wait-a-moment-and-try-again-and-disable-the-submit-button-once-the-actor-becomes-available-re-enable-submission-automatically-without-requiring-a-page-reload",
+      "title": "In `frontend/src/components/ProductForm.tsx`, add a guard that checks whether the actor is available before the form's submit handler fires. If the actor is not yet ready, display a clear inline message (e.g., 'Authenticating — please wait a moment and try again') and disable the submit button. Once the actor becomes available, re-enable submission automatically without requiring a page reload.",
+      "reqIds": [
+        "REQ-84"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-frontend-src-components-adminproductssection-tsx-ensure-that-the-actor-instance-used-for-addproduct-updateproduct-and-deleteproduct-mutations-is-sourced-from-the-same-reactive-actor-hook-used-throughout-the-admin-panel-replace-any-direct-or-stale-actor-references-with-the-live-authenticated-actor-from-useactor-if-the-actor-is-unavailable-when-a-mutation-is-triggered-surface-a-user-friendly-error-toast-session-not-ready-please-wait-or-refresh-rather-than-propagating-a-raw-exception",
+      "title": "In `frontend/src/components/AdminProductsSection.tsx`, ensure that the actor instance used for `addProduct`, `updateProduct`, and `deleteProduct` mutations is sourced from the same reactive actor hook used throughout the admin panel. Replace any direct or stale actor references with the live authenticated actor from `useActor`. If the actor is unavailable when a mutation is triggered, surface a user-friendly error toast ('Session not ready. Please wait or refresh.') rather than propagating a raw exception.",
+      "reqIds": [
+        "REQ-85"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-src-hooks-usequeries-ts-so-the-uselistproducts-or-equivalent-hook-calls-the-paginated-listproducts-offset-limit-endpoint-the-hook-must-accept-an-offset-parameter-return-both-the-products-array-and-the-total-count-and-support-the-load-more-append-pattern-used-in-both-adminproductssection-and-collection",
+      "title": "Update `frontend/src/hooks/useQueries.ts` so the `useListProducts` (or equivalent) hook calls the paginated `listProducts(offset, limit)` endpoint. The hook must accept an `offset` parameter, return both the `products` array and the `total` count, and support the 'Load More' append pattern used in both `AdminProductsSection` and `Collection`.",
+      "reqIds": [
+        "REQ-88"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-src-components-adminproductssection-tsx-to-use-the-paginated-listproducts-offset-limit-endpoint-via-the-updated-hook-on-initial-load-fetch-10-products-offset-0-limit-10-show-a-load-more-button-below-the-product-list-that-fetches-the-next-10-products-offset-currentcount-limit-10-and-appends-them-to-the-existing-list-hide-the-load-more-button-when-currentcount-total-all-products-loaded-if-the-backend-call-fails-or-times-out-show-a-graceful-error-state-with-a-retry-button",
+      "title": "Update `frontend/src/components/AdminProductsSection.tsx` to use the paginated `listProducts(offset, limit)` endpoint via the updated hook. On initial load, fetch 10 products (offset=0, limit=10). Show a 'Load More' button below the product list that fetches the next 10 products (offset=currentCount, limit=10) and appends them to the existing list. Hide the 'Load More' button when currentCount >= total (all products loaded). If the backend call fails or times out, show a graceful error state with a retry button.",
+      "reqIds": [
+        "REQ-89"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-rewrite-the-uselistproducts-or-equivalent-hook-in-frontend-src-hooks-usequeries-ts-to-call-the-paginated-listproducts-offset-nat-limit-nat-backend-endpoint-the-hook-must-accept-an-offset-parameter-defaulting-to-0-use-a-fixed-limit-of-10-and-return-both-the-products-array-and-the-total-count-it-must-support-the-load-more-append-pattern-successive-calls-with-increasing-offsets-append-results-to-the-accumulated-list",
+      "title": "Rewrite the `useListProducts` (or equivalent) hook in `frontend/src/hooks/useQueries.ts` to call the paginated `listProducts(offset: Nat, limit: Nat)` backend endpoint. The hook must accept an `offset` parameter (defaulting to 0), use a fixed `limit` of 10, and return both the `products` array and the `total` count. It must support the 'Load More' append pattern: successive calls with increasing offsets append results to the accumulated list.",
+      "reqIds": [
+        "REQ-91"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-rewrite-frontend-src-components-adminproductssection-tsx-to-use-the-paginated-listproducts-offset-limit-endpoint-via-the-updated-hook-from-req-91-on-initial-mount-fetch-10-products-offset-0-limit-10-maintain-a-local-products-array-and-offset-counter-in-component-state-show-a-load-more-button-below-the-product-list-that-fetches-the-next-10-offset-currentcount-limit-10-and-appends-them-to-the-existing-list-hide-the-load-more-button-when-currentcount-total-if-the-backend-call-fails-or-does-not-respond-within-15-seconds-show-a-graceful-error-state-with-message-could-not-load-products-please-try-again-and-a-retry-button-do-not-make-any-unbounded-listproducts-call",
+      "title": "Rewrite `frontend/src/components/AdminProductsSection.tsx` to use the paginated `listProducts(offset, limit)` endpoint via the updated hook from REQ-91. On initial mount, fetch 10 products (`offset=0, limit=10`). Maintain a local `products` array and `offset` counter in component state. Show a 'Load More' button below the product list that fetches the next 10 (`offset=currentCount, limit=10`) and appends them to the existing list. Hide the 'Load More' button when `currentCount >= total`. If the backend call fails or does not respond within 15 seconds, show a graceful error state with message 'Could not load products. Please try again.' and a Retry button. Do not make any unbounded `listProducts()` call.",
+      "reqIds": [
+        "REQ-92"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-src-pages-collection-tsx-to-use-the-same-paginated-listproducts-offset-limit-hook-from-req-91-on-initial-load-fetch-the-first-10-products-offset-0-limit-10-show-a-load-more-button-below-the-product-grid-that-fetches-the-next-10-and-appends-them-hide-the-button-when-currentcount-total-ensure-no-unbounded-product-fetch-is-triggered-from-this-page",
+      "title": "Update `frontend/src/pages/Collection.tsx` to use the same paginated `listProducts(offset, limit)` hook from REQ-91. On initial load fetch the first 10 products (`offset=0, limit=10`). Show a 'Load More' button below the product grid that fetches the next 10 and appends them. Hide the button when `currentCount >= total`. Ensure no unbounded product fetch is triggered from this page.",
+      "reqIds": [
+        "REQ-93"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-audit-and-fix-all-typescript-compilation-errors-in-the-frontend-that-caused-the-version-20-deployment-to-fail-ensure-frontend-src-hooks-usequeries-ts-frontend-src-components-adminproductssection-tsx-and-frontend-src-pages-collection-tsx-correctly-call-the-paginated-listproducts-offset-limit-endpoint-handle-the-products-total-response-shape-and-compile-without-type-errors",
+      "title": "Audit and fix all TypeScript compilation errors in the frontend that caused the Version 20 deployment to fail. Ensure `frontend/src/hooks/useQueries.ts`, `frontend/src/components/AdminProductsSection.tsx`, and `frontend/src/pages/Collection.tsx` correctly call the paginated `listProducts(offset, limit)` endpoint, handle the `{ products, total }` response shape, and compile without type errors.",
+      "reqIds": [
+        "REQ-95"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-authenticated-actor-construction-so-that-createactor-is-never-called-with-both-an-agent-parameter-and-agentoptions-simultaneously-when-an-authenticated-internet-identity-is-present-construct-a-single-httpagent-from-that-identity-and-pass-only-the-agent-parameter-when-unauthenticated-pass-only-agentoptions-with-the-anonymous-configuration-this-ensures-the-correct-non-anonymous-principal-is-forwarded-to-all-backend-calls-including-admin-endpoints-resolving-the-actor-not-available-error-in-productform",
+      "title": "Fix the authenticated actor construction so that `createActor` is never called with both an `agent` parameter and `agentOptions` simultaneously. When an authenticated Internet Identity is present, construct a single `HttpAgent` from that identity and pass only the `agent` parameter. When unauthenticated, pass only `agentOptions` with the anonymous configuration. This ensures the correct non-anonymous principal is forwarded to all backend calls including admin endpoints, resolving the 'Actor not available' error in `ProductForm`.",
+      "reqIds": [
+        "REQ-96"
       ],
       "version": 1
     }
@@ -431,6 +681,250 @@
       "summary": "Add detailed debug logging throughout the authentication and authorization flow in the backend, including principal extraction, profile lookup, isAdmin flag status, role verification, and the final authorization decision for each admin endpoint call",
       "reqIds": [
         "REQ-41"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-36",
+      "summary": "Fix the actor initialization in the frontend so that createActor is never called with both an `agent` and `agentOptions` simultaneously. When an authenticated Internet Identity identity is available, construct a single HttpAgent from that identity and pass only the `agent` parameter to createActor, omitting `agentOptions`. When unauthenticated, pass only `agentOptions` with the default anonymous configuration. This ensures the correct Internet Identity principal is forwarded to all backend calls including admin endpoints.",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-37",
+      "summary": "After fixing the agent initialization conflict, verify that the AdminPanel and ProductForm components can successfully invoke addProduct, updateProduct, and deleteProduct backend calls using the properly authenticated actor, and that no 'You don't have admin privileges' or authorization failure errors appear for a logged-in admin user.",
+      "reqIds": [
+        "REQ-44"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-38",
+      "summary": "Rewrite the backend `getOrCreateProfile` function to unconditionally set `isAdmin = true` and `role = #admin` for every authenticated Internet Identity principal, removing any conditional checks or guards that prevent admin role assignment.",
+      "reqIds": [
+        "REQ-45"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-39",
+      "summary": "Fix the `isAuthorized` function (and any authorization mixin) in the backend so that it returns `true` whenever the caller's profile has `isAdmin = true`, and logs the principal, isAdmin flag, and final authorization decision for every admin endpoint call.",
+      "reqIds": [
+        "REQ-46"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-40",
+      "summary": "Remove or bypass any secondary role-based authorization guards inside the `addProduct`, `updateProduct`, and `deleteProduct` backend endpoints that could block authenticated principals from executing admin operations, ensuring a single unified isAdmin check is the sole gatekeeper.",
+      "reqIds": [
+        "REQ-47"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-41",
+      "summary": "Fix the frontend `useActor.ts`-adjacent actor creation logic so that `createActor` is never invoked with both an `agent` parameter and `agentOptions` simultaneously. When an authenticated Internet Identity identity is present, construct a single `HttpAgent` from that identity and pass only `agent`; when unauthenticated, pass only `agentOptions` with the anonymous configuration.",
+      "reqIds": [
+        "REQ-48"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-42",
+      "summary": "Update the `AdminPanel` page component to remove the 'You do not have admin privileges' blocking error UI for authenticated users. The panel should display the full product management interface (add, edit, delete, bulk import) immediately after successful Internet Identity login, without requiring any additional manual role grants.",
+      "reqIds": [
+        "REQ-49"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-43",
+      "summary": "Completely rebuild admin panel with simplified authentication: all Internet Identity authenticated users automatically get admin access, no role-based checks",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-44",
+      "summary": "Admin dashboard analytics cards: total products, active vs inactive count, products per category, recent customization requests, contact form submissions count, WhatsApp inquiries",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-45",
+      "summary": "Product management with multiple image upload (base64 with client-side compression), image preview, delete/replace individual images, active/inactive toggle, and WhatsApp integration settings per product",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-46",
+      "summary": "Category management interface in admin panel for all four wood categories (Mango Wood, Acacia Wood, Line Range, Customised Products)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-47",
+      "summary": "Completely rebuild the backend authentication and authorization model: remove all role-based access control mixins and role checks from addProduct, updateProduct, and deleteProduct endpoints. Replace with a single simplified check that grants admin access to any authenticated Internet Identity principal (i.e., any non-anonymous caller is authorized). Update getOrCreateProfile to unconditionally set isAdmin = true and role = #admin for every authenticated principal.",
+      "reqIds": [
+        "REQ-51"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-48",
+      "summary": "Add backend query endpoints to support the admin dashboard analytics: getAnalyticsSummary returning total product count, active product count, inactive product count, products grouped by category, total customization request count, total contact form submission count, and a list of the 5 most recent customization requests and contact submissions.",
+      "reqIds": [
+        "REQ-52"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-49",
+      "summary": "Update the Product data model in the backend to include an isActive boolean field (defaulting to true) and a whatsappMessage optional text field for per-product WhatsApp integration customization. Update addProduct and updateProduct to accept and persist these new fields. Ensure existing products without these fields are handled gracefully.",
+      "reqIds": [
+        "REQ-53"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-55",
+      "summary": "Fix the actor initialization in the frontend so that when an authenticated Internet Identity is present, a single HttpAgent is constructed from that identity and passed only as the `agent` parameter to createActor, with no agentOptions passed simultaneously. When unauthenticated, pass only agentOptions with the anonymous configuration. This ensures the correct Internet Identity principal reaches all backend calls including admin endpoints.",
+      "reqIds": [
+        "REQ-59"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-56",
+      "summary": "Replace Internet Identity authentication with custom admin login (username: Harsh Rawal, password: Harsh@0808) and customer account registration with email/password",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-57",
+      "summary": "Upgrade Customize page with hero section 'Craft Your Dream Furniture', 3 premium feature cards, enhanced form (furniture type/wood type dropdowns, dimensions, finish, reference image upload), WhatsApp CTA, trust section, and 'See Our Custom Work' gallery using existing product images",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-58",
+      "summary": "Fix admin panel 'You do not have admin privileges' blocking error by removing role/privilege checks in frontend AdminPanel and backend addProduct/updateProduct/deleteProduct endpoints, replacing with single non-anonymous caller check",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-59",
+      "summary": "Rewrite the backend authorization logic in `backend/main.mo` so that `addProduct`, `updateProduct`, and `deleteProduct` endpoints use a single, simple check: if `msg.caller != Principal.anonymous()`, the call is authorized. Remove all role-based checks, mixin-based `isAuthorized` calls, profile lookups, and `isAdmin` flag checks from these three endpoints entirely.",
+      "reqIds": [
+        "REQ-60"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-60",
+      "summary": "In `frontend/src/pages/AdminPanel.tsx`, remove the 'You do not have admin privileges' blocking error UI entirely. After a user is authenticated (Internet Identity session exists and identity is not anonymous), render the full admin panel interface — sidebar, dashboard, products, categories — immediately without any privilege gate or role check.",
+      "reqIds": [
+        "REQ-61"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-61",
+      "summary": "Fix the actor construction in `frontend/src/hooks/useActor.ts` (or wherever `createActor` is called) so that when an authenticated Internet Identity is present, a single `HttpAgent` is constructed from that identity and passed only as the `agent` parameter to `createActor`, with no `agentOptions` passed simultaneously. When unauthenticated, pass only `agentOptions` with the default anonymous configuration. This ensures the correct non-anonymous principal is forwarded to the backend on every admin call.",
+      "reqIds": [
+        "REQ-62"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-62",
+      "summary": "Fix 'Failed to load products' IC payload limit error by adding pagination to listProducts — 10 products per page with a 'Load More' button",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-63",
+      "summary": "In admin panel Categories section, when a category is selected/viewed, show an 'Add Product to this Category' button with that category pre-filled in the product form",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-64",
+      "summary": "Send contact form submissions and customization requests to WhatsApp (+91 9828288383) AND store/display them in the admin panel dashboard",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-65",
+      "summary": "Add a paginated `listProducts` backend endpoint that accepts `offset: Nat` and `limit: Nat` parameters and returns a slice of products plus a `total: Nat` count. The default page size must be 10. Remove or deprecate the existing unbounded `listProducts` call that returns all products at once, which causes the IC payload size to exceed the 3.14MB limit (confirmed by the screenshot showing a 10MB response rejection with error IC0504).",
+      "reqIds": [
+        "REQ-64"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-68",
+      "summary": "Update the backend contact form submission handler (`submitContactForm`) so that after saving the submission to stable storage, it also constructs a WhatsApp-compatible pre-filled message URL with all form fields (name, email, message, timestamp) targeting WhatsApp number +91 9828288383. Return this WhatsApp URL in the response so the frontend can open it automatically or provide a link.",
+      "reqIds": [
+        "REQ-67"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-71",
+      "summary": "Ensure the admin panel Dashboard section (`frontend/src/components/AdminDashboard.tsx`) correctly displays all stored contact form submissions and customization requests fetched from the backend, showing at minimum: the 5 most recent customization requests (name, product type, timestamp) and the total count of contact form submissions.",
+      "reqIds": [
+        "REQ-70"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-72",
+      "summary": "Update the backend `listProducts` query in `backend/main.mo` to accept `offset: Nat` and `limit: Nat` parameters and return only a slice of products plus a `total: Nat` count. Remove or replace the existing unbounded `listProducts` that returns all products at once (which causes the IC0504 payload error — confirmed 10,004,331 bytes exceeding the 3,145,728-byte limit). The new signature must be: `listProducts(offset: Nat, limit: Nat) : async { products: [Product]; total: Nat }`. Default page size is 10.",
+      "reqIds": [
+        "REQ-71"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-73",
+      "summary": "In `backend/main.mo`, remove the admin-only authorization guard from the paginated `listProducts(offset: Nat, limit: Nat)` endpoint so that any caller — authenticated or anonymous — can fetch the paginated product list without receiving an 'Unauthorized: Only admins can list all products' error. The endpoint must remain functional and return `{ products: [Product]; total: Nat }` as before.",
+      "reqIds": [
+        "REQ-75"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-74",
+      "summary": "In `backend/main.mo`, remove the admin-only authorization guard from the `getAnalyticsSummary` endpoint so that any authenticated (non-anonymous) caller can fetch analytics data without receiving the 'Unauthorized: Only admins can view analytics' error. The endpoint must continue to return the full analytics summary as before.",
+      "reqIds": [
+        "REQ-86"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-75",
+      "summary": "Update `backend/main.mo` so the paginated `listProducts(offset: Nat, limit: Nat)` endpoint has no authorization guard — any caller (authenticated or anonymous) can call it. The endpoint must return `{ products: [Product]; total: Nat }`. Remove or replace any existing unbounded `listProducts` that returns all products at once, as it causes the IC0504 payload size error (4,555,808 bytes exceeding the 3,145,728-byte limit).",
+      "reqIds": [
+        "REQ-87"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-76",
+      "summary": "Rewrite the `listProducts` public query in `backend/main.mo` to accept `offset: Nat` and `limit: Nat` parameters and return `{ products: [Product]; total: Nat }` — slicing the internal products array to `Array.subArray(allProducts, offset, min(limit, total - offset))` before returning. Remove or replace any existing unbounded `listProducts` that returns all products at once. No authorization guard must be applied — any caller (anonymous or authenticated) must be able to call this endpoint. This is the root cause of the IC0504 payload size error (4,555,808 bytes > 3,145,728 limit).",
+      "reqIds": [
+        "REQ-90"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-77",
+      "summary": "Audit and fix all compilation and runtime errors in `backend/main.mo` that caused the Version 20 deployment to fail. Ensure the paginated `listProducts(offset: Nat, limit: Nat)` endpoint compiles cleanly, has no authorization guard, returns `{ products: [Product]; total: Nat }`, and does not exceed the IC message size limit. Remove any unbounded `listProducts` call that returns all products at once.",
+      "reqIds": [
+        "REQ-94"
       ],
       "status": "pending"
     }

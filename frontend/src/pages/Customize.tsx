@@ -4,8 +4,10 @@ import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Button } from '../components/ui/button';
-import { Upload, MessageCircle, CheckCircle } from 'lucide-react';
+import { Upload, MessageCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { WoodType } from '../backend';
+import { useSubmitCustomizationRequest } from '../hooks/useQueries';
+import { toast } from 'sonner';
 
 export default function Customize() {
   const [formData, setFormData] = useState({
@@ -19,6 +21,8 @@ export default function Customize() {
   });
   const [referenceImage, setReferenceImage] = useState<File | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+
+  const { mutateAsync: submitRequest, isPending } = useSubmitCustomizationRequest();
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -41,20 +45,36 @@ export default function Customize() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     // Validate required fields
     if (!formData.name || !formData.phone || !formData.email || !formData.productType || !formData.message) {
-      alert('Please fill in all required fields');
+      toast.error('Please fill in all required fields');
       return;
     }
 
-    // Construct WhatsApp message
-    const woodTypeLabel = getWoodTypeLabel(formData.woodType);
-    const imageNote = referenceImage ? '\n\nNote: A reference image has been provided.' : '';
-    
-    const message = `Hello, I'm interested in a customized product.
+    try {
+      // 1. Save to backend
+      await submitRequest({
+        id: `custom-${Date.now()}`,
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        productType: formData.productType,
+        woodType: formData.woodType,
+        dimensions: formData.dimensions,
+        message: formData.message,
+        referenceImageUrl: undefined,
+        timestamp: BigInt(Date.now() * 1000000),
+        status: 'pending',
+      });
+
+      // 2. Construct WhatsApp message with all details
+      const woodTypeLabel = getWoodTypeLabel(formData.woodType);
+      const imageNote = referenceImage ? '\n\nNote: A reference image has been provided. Please ask the customer to share it.' : '';
+
+      const whatsappMessage = `Hello, I'm interested in a customized product.
 
 Customer Details:
 Name: ${formData.name}
@@ -69,29 +89,32 @@ Dimensions: ${formData.dimensions || 'Not specified'}
 Additional Details:
 ${formData.message}${imageNote}`;
 
-    // URL encode the message
-    const encodedMessage = encodeURIComponent(message);
-    
-    // Open WhatsApp with pre-filled message
-    const whatsappUrl = `https://wa.me/919828288383?text=${encodedMessage}`;
-    window.open(whatsappUrl, '_blank');
+      const encodedMessage = encodeURIComponent(whatsappMessage);
+      const waUrl = `https://wa.me/919828288383?text=${encodedMessage}`;
 
-    // Show success message
-    setShowSuccess(true);
-    
-    // Reset form
-    setFormData({
-      name: '',
-      phone: '',
-      email: '',
-      productType: '',
-      woodType: WoodType.mangoWood,
-      dimensions: '',
-      message: '',
-    });
-    setReferenceImage(null);
+      // 3. Open WhatsApp
+      window.open(waUrl, '_blank');
 
-    setTimeout(() => setShowSuccess(false), 5000);
+      // 4. Show success
+      setShowSuccess(true);
+      toast.success('Request saved and WhatsApp opened!');
+
+      // Reset form
+      setFormData({
+        name: '',
+        phone: '',
+        email: '',
+        productType: '',
+        woodType: WoodType.mangoWood,
+        dimensions: '',
+        message: '',
+      });
+      setReferenceImage(null);
+
+      setTimeout(() => setShowSuccess(false), 6000);
+    } catch (error: any) {
+      toast.error(error?.message || 'Failed to submit request. Please try again.');
+    }
   };
 
   return (
@@ -109,10 +132,15 @@ ${formData.message}${imageNote}`;
 
         {showSuccess && (
           <div className="mb-8 p-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-center space-x-3">
-            <CheckCircle className="text-green-600 dark:text-green-400" size={24} />
-            <p className="text-green-800 dark:text-green-200 font-medium">
-              Opening WhatsApp with your customization details. We'll get back to you soon!
-            </p>
+            <CheckCircle className="text-green-600 dark:text-green-400 shrink-0" size={24} />
+            <div>
+              <p className="text-green-800 dark:text-green-200 font-medium">
+                Your request has been saved and WhatsApp has been opened with your details!
+              </p>
+              <p className="text-green-700 dark:text-green-300 text-sm mt-1">
+                Your request is also visible in the admin panel. We'll get back to you soon.
+              </p>
+            </div>
           </div>
         )}
 
@@ -225,20 +253,33 @@ ${formData.message}${imageNote}`;
               )}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Note: The image will be kept locally. Please mention it in your WhatsApp message and share it there.
+              Note: Please share the reference image directly in the WhatsApp chat that will open.
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
-            <Button type="submit" className="flex-1 flex items-center justify-center space-x-2">
-              <MessageCircle size={18} />
-              <span>Send via WhatsApp</span>
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="flex-1 flex items-center justify-center space-x-2"
+            >
+              {isPending ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  <span>Submitting...</span>
+                </>
+              ) : (
+                <>
+                  <MessageCircle size={18} />
+                  <span>Submit & Send via WhatsApp</span>
+                </>
+              )}
             </Button>
           </div>
 
           <div className="text-center pt-2">
             <p className="text-sm text-muted-foreground">
-              For customized products, details will be shared directly via WhatsApp: +91 9828288383
+              Your request will be saved and sent to WhatsApp: +91 9828288383
             </p>
           </div>
         </form>

@@ -10,13 +10,25 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
+export interface AnalyticsSummary {
+  'totalProducts' : bigint,
+  'recentContactSubmissions' : Array<ContactFormSubmission>,
+  'totalCustomizationRequests' : bigint,
+  'recentCustomizationRequests' : Array<CustomizationRequest>,
+  'productsByCategory' : Array<[string, Array<Product>]>,
+  'inactiveProducts' : bigint,
+  'totalContactSubmissions' : bigint,
+  'activeProducts' : bigint,
+}
 export interface ContactFormSubmission {
+  'id' : string,
   'name' : string,
   'email' : string,
   'message' : string,
   'timestamp' : Time,
 }
 export interface CustomizationRequest {
+  'id' : string,
   'status' : string,
   'name' : string,
   'referenceImageUrl' : [] | [ExternalBlob],
@@ -29,9 +41,15 @@ export interface CustomizationRequest {
   'dimensions' : string,
 }
 export type ExternalBlob = Uint8Array;
+export type ImageId = Uint8Array;
+export interface PaginatedProducts {
+  'total' : bigint,
+  'products' : Array<Product>,
+}
 export interface Product {
   'id' : ProductId,
-  'imageUrls' : Array<ExternalBlob>,
+  'whatsappMessage' : [] | [string],
+  'imageUrls' : Array<ImageId>,
   'name' : string,
   'description' : string,
   'isActive' : boolean,
@@ -41,11 +59,7 @@ export interface Product {
 }
 export type ProductId = string;
 export type Time = bigint;
-export interface UserProfile {
-  'name' : string,
-  'email' : [] | [string],
-  'phone' : [] | [string],
-}
+export interface UserProfile { 'name' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
@@ -84,21 +98,29 @@ export interface _SERVICE {
   'addProduct' : ActorMethod<[Product], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'deleteProduct' : ActorMethod<[ProductId], undefined>,
+  'getAnalyticsSummary' : ActorMethod<[], AnalyticsSummary>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
-  'getContactFormSubmissions' : ActorMethod<[], Array<ContactFormSubmission>>,
-  'getCustomizationRequests' : ActorMethod<[], Array<CustomizationRequest>>,
   'getFeaturedProducts' : ActorMethod<[], Array<Product>>,
-  'getMangoWoodProductByIdInternal' : ActorMethod<[ProductId], Product>,
-  'getMangoWoodProductsInternal' : ActorMethod<[[] | [string]], Array<Product>>,
+  'getMostRecentContactFormSubmissions' : ActorMethod<
+    [bigint],
+    Array<ContactFormSubmission>
+  >,
+  'getMostRecentCustomizationRequests' : ActorMethod<
+    [bigint],
+    Array<CustomizationRequest>
+  >,
   'getProductById' : ActorMethod<[ProductId], Product>,
   'getProducts' : ActorMethod<[[] | [string]], Array<Product>>,
+  'getProductsGroupedByCategory' : ActorMethod<
+    [],
+    Array<[string, Array<Product>]>
+  >,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
-  'listMangoWoodProductsInternal' : ActorMethod<[], Array<Product>>,
-  'listProducts' : ActorMethod<[], Array<Product>>,
+  'listProducts' : ActorMethod<[bigint, bigint], PaginatedProducts>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
-  'submitContactForm' : ActorMethod<[ContactFormSubmission], undefined>,
+  'submitContactForm' : ActorMethod<[ContactFormSubmission], string>,
   'submitCustomizationRequest' : ActorMethod<[CustomizationRequest], undefined>,
   'updateProduct' : ActorMethod<[ProductId, Product], undefined>,
 }

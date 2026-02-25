@@ -1,21 +1,22 @@
 import Array "mo:core/Array";
 import List "mo:core/List";
-import Iter "mo:core/Iter";
 import Map "mo:core/Map";
 import Text "mo:core/Text";
 import Time "mo:core/Time";
+import Nat "mo:core/Nat";
 import Principal "mo:core/Principal";
 import Order "mo:core/Order";
 import Runtime "mo:core/Runtime";
-import Debug "mo:core/Debug";
-import MixinAuthorization "authorization/MixinAuthorization";
+import Iter "mo:core/Iter";
 import MixinStorage "blob-storage/Mixin";
 import Storage "blob-storage/Storage";
 import AccessControl "authorization/access-control";
+import MixinAuthorization "authorization/MixinAuthorization";
 
 actor {
-  let accessControlState = AccessControl.initState();
   include MixinStorage();
+
+  let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
   type ProductId = Text;
@@ -34,12 +35,14 @@ actor {
     description : Text;
     woodType : WoodType;
     category : Text;
-    imageUrls : [Storage.ExternalBlob];
+    imageUrls : [ImageId];
     finishInfo : Text;
     isActive : Bool;
+    whatsappMessage : ?Text;
   };
 
   public type CustomizationRequest = {
+    id : Text;
     name : Text;
     phone : Text;
     email : Text;
@@ -53,6 +56,7 @@ actor {
   };
 
   public type ContactFormSubmission = {
+    id : Text;
     name : Text;
     email : Text;
     message : Text;
@@ -61,46 +65,28 @@ actor {
 
   public type UserProfile = {
     name : Text;
-    email : ?Text;
-    phone : ?Text;
+  };
+
+  public type AnalyticsSummary = {
+    totalProducts : Nat;
+    activeProducts : Nat;
+    inactiveProducts : Nat;
+    productsByCategory : [(Text, [Product])];
+    totalCustomizationRequests : Nat;
+    totalContactSubmissions : Nat;
+    recentCustomizationRequests : [CustomizationRequest];
+    recentContactSubmissions : [ContactFormSubmission];
+  };
+
+  public type PaginatedProducts = {
+    products : [Product];
+    total : Nat;
   };
 
   var products = Map.empty<ProductId, Product>();
-  var mangoWoodProducts = Map.empty<ProductId, Product>();
   var customizationRequests = List.empty<CustomizationRequest>();
   var contactFormSubmissions = List.empty<ContactFormSubmission>();
   let userProfiles = Map.empty<Principal, UserProfile>();
-
-  let categoryRange = [
-    "Tables",
-    "Chairs",
-    "Desks",
-    "Cabinets",
-    "Beds",
-    "Sofas",
-    "Chests",
-    "Consoles",
-    "Benches",
-    "Lightning",
-    "Shelves",
-    "Decor",
-    "Accessories",
-    "Rugs",
-    "Mirrors",
-    "Antiques",
-  ];
-
-  let woodTypeRange = [
-    #mangoWood,
-    #acaciaWood,
-    #lineRange,
-    #customisedProducts,
-  ];
-
-  public type ProductNotFound = {
-    #ProductNotFound : Text;
-    #Unauthorized : Text;
-  };
 
   module Product {
     public func compareById(product1 : Product, product2 : Product) : Order.Order {
@@ -108,10 +94,11 @@ actor {
     };
   };
 
-  // User Profile Management Functions
+  // ── User profile management ─────────────────────────────────────────────────
+
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can view profiles");
+      Runtime.trap("Unauthorized: Only users can get profiles");
     };
     userProfiles.get(caller);
   };
@@ -130,16 +117,105 @@ actor {
     userProfiles.add(caller, profile);
   };
 
-  // Product Management Functions - Admin Only
+  // ── Analytics ──────────────────────────────────────────────────────────────
+
+  public query ({ caller }) func getAnalyticsSummary() : async AnalyticsSummary {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can view analytics");
+    };
+    let allProducts = products.values().toArray();
+    {
+      totalProducts = allProducts.size();
+      activeProducts = allProducts.filter(func(p : Product) : Bool { p.isActive }).size();
+      inactiveProducts = allProducts.filter(func(p : Product) : Bool { not p.isActive }).size();
+      productsByCategory = computeProductsGroupedByCategory();
+      totalCustomizationRequests = customizationRequests.size();
+      totalContactSubmissions = contactFormSubmissions.size();
+      recentCustomizationRequests = computeMostRecentCustomizationRequests(5);
+      recentContactSubmissions = computeMostRecentContactFormSubmissions(5);
+    };
+  };
+
+  func computeProductsGroupedByCategory() : [(Text, [Product])] {
+    let groupedMap = Map.empty<Text, [Product]>();
+    for (product in products.values()) {
+      let existing = switch (groupedMap.get(product.category)) {
+        case (null) { [] };
+        case (?ps) { ps };
+      };
+      groupedMap.add(product.category, existing.concat([product]));
+    };
+    groupedMap.toArray();
+  };
+
+  func computeMostRecentCustomizationRequests(limit : Nat) : [CustomizationRequest] {
+    let allRequests = customizationRequests.toArray();
+    let sortedRequests = allRequests.sort(
+      func(a : CustomizationRequest, b : CustomizationRequest) : Order.Order {
+        if (a.timestamp > b.timestamp) { #less } else if (a.timestamp == b.timestamp) { #equal } else {
+          #greater;
+        };
+      }
+    );
+    let sortedSize = sortedRequests.size();
+    if (sortedSize <= limit) {
+      sortedRequests;
+    } else {
+      Array.tabulate<CustomizationRequest>(limit, func(i) { sortedRequests[i] });
+    };
+  };
+
+  func computeMostRecentContactFormSubmissions(limit : Nat) : [ContactFormSubmission] {
+    let allSubmissions = contactFormSubmissions.toArray();
+    let sortedSubmissions = allSubmissions.sort(
+      func(a : ContactFormSubmission, b : ContactFormSubmission) : Order.Order {
+        if (a.timestamp > b.timestamp) { #less } else if (a.timestamp == b.timestamp) { #equal } else {
+          #greater;
+        };
+      }
+    );
+    let sortedSize = sortedSubmissions.size();
+    if (sortedSize <= limit) {
+      sortedSubmissions;
+    } else {
+      Array.tabulate<ContactFormSubmission>(limit, func(i) { sortedSubmissions[i] });
+    };
+  };
+
+  public query ({ caller }) func getProductsGroupedByCategory() : async [(Text, [Product])] {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can view products grouped by category");
+    };
+    computeProductsGroupedByCategory();
+  };
+
+  public query ({ caller }) func getMostRecentCustomizationRequests(limit : Nat) : async [CustomizationRequest] {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can view customization requests");
+    };
+    computeMostRecentCustomizationRequests(limit);
+  };
+
+  public query ({ caller }) func getMostRecentContactFormSubmissions(limit : Nat) : async [ContactFormSubmission] {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can view contact form submissions");
+    };
+    computeMostRecentContactFormSubmissions(limit);
+  };
+
+  // ── Product management (admin-only) ─────────────────────────────────────────
+
   public shared ({ caller }) func addProduct(product : Product) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only admins can add products");
     };
-    if (not products.containsKey(product.id)) { products.add(product.id, product) };
+    if (not products.containsKey(product.id)) {
+      products.add(product.id, product);
+    };
   };
 
   public shared ({ caller }) func updateProduct(productId : ProductId, updatedProduct : Product) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only admins can update products");
     };
     switch (products.get(productId)) {
@@ -149,81 +225,94 @@ actor {
   };
 
   public shared ({ caller }) func deleteProduct(productId : ProductId) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only admins can delete products");
     };
     if (products.containsKey(productId)) {
       products.remove(productId);
-    } else { Runtime.trap("DeleteProduct: Product not found") };
+    } else {
+      Runtime.trap("DeleteProduct: Product not found");
+    };
   };
 
-  // Public Product Query Functions
-  public query ({ caller }) func listProducts() : async [Product] {
-    products.values().toArray().sort(Product.compareById);
+  public query func listProducts(offset : Nat, limit : Nat) : async PaginatedProducts {
+    let sortedArray = products.values().toArray().sort(Product.compareById);
+    let totalProducts = sortedArray.size();
+
+    let defaultLimit = 10;
+    let safeOffset = if (offset > totalProducts) { totalProducts } else { offset };
+    let safeLimit = if (limit > 0) { limit } else { defaultLimit };
+
+    let endIndex = if (safeOffset + safeLimit > totalProducts) {
+      totalProducts;
+    } else { safeOffset + safeLimit };
+
+    let productsArray = if (totalProducts > 0 and endIndex > safeOffset) {
+      Array.tabulate(
+        endIndex - safeOffset,
+        func(i) {
+          sortedArray[safeOffset + i];
+        },
+      );
+    } else {
+      [];
+    };
+    {
+      products = productsArray;
+      total = totalProducts;
+    };
   };
 
-  public query ({ caller }) func getProducts(category : ?Text) : async [Product] {
+  // ── Public product queries (no auth required) ───────────────────────────────
+
+  public query func getProducts(category : ?Text) : async [Product] {
     products.values().toArray().filter(
-      func(product) {
-        product.isActive and (category == null or (category != null and product.category == category.unwrap()))
+      func(product : Product) : Bool {
+        product.isActive and (
+          switch (category) {
+            case (null) { true };
+            case (?cat) { product.category == cat };
+          }
+        );
       }
     );
   };
 
-  public query ({ caller }) func getProductById(productId : ProductId) : async Product {
+  public query func getProductById(productId : ProductId) : async Product {
     switch (products.get(productId)) {
       case (?product) { product };
       case (null) { Runtime.trap("Product not found") };
     };
   };
 
-  public query ({ caller }) func getFeaturedProducts() : async [Product] {
+  public query func getFeaturedProducts() : async [Product] {
     products.values().toArray().filter(
-      func(product) { product.isActive }
+      func(product : Product) : Bool { product.isActive }
     );
   };
 
-  public query ({ caller }) func listMangoWoodProductsInternal() : async [Product] {
-    mangoWoodProducts.values().toArray().sort(Product.compareById);
-  };
+  // ── Public form submissions (no auth required) ──────────────────────────────
 
-  public query ({ caller }) func getMangoWoodProductsInternal(category : ?Text) : async [Product] {
-    mangoWoodProducts.values().toArray().filter(
-      func(product) {
-        product.isActive and (category == null or (category != null and product.category == category.unwrap()))
-      }
-    );
-  };
-
-  public query ({ caller }) func getMangoWoodProductByIdInternal(productId : ProductId) : async Product {
-    switch (mangoWoodProducts.get(productId)) {
-      case (?product) { product };
-      case (null) { Runtime.trap("Product not found") };
-    };
-  };
-
-  // Public submission functions
-  public shared ({ caller }) func submitCustomizationRequest(request : CustomizationRequest) : async () {
+  public shared func submitCustomizationRequest(request : CustomizationRequest) : async () {
     customizationRequests.add(request);
   };
 
-  // Admin-only: View customization requests
-  public query ({ caller }) func getCustomizationRequests() : async [CustomizationRequest] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can view customization requests");
-    };
-    customizationRequests.toArray();
-  };
-
-  public shared ({ caller }) func submitContactForm(submission : ContactFormSubmission) : async () {
+  public shared func submitContactForm(submission : ContactFormSubmission) : async Text {
     contactFormSubmissions.add(submission);
-  };
 
-  // Admin-only: View contact form submissions
-  public query ({ caller }) func getContactFormSubmissions() : async [ContactFormSubmission] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
-      Runtime.trap("Unauthorized: Only admins can view contact form submissions");
-    };
-    contactFormSubmissions.toArray();
+    let whatsappNumber = "919828288383";
+    let timestampText = submission.timestamp.toText();
+
+    let messageText = "Contact%20Form%20Submission%0AName%3A%20"
+      # submission.name
+      # "%0AEmail%3A%20"
+      # submission.email
+      # "%0AMessage%3A%20"
+      # submission.message
+      # "%0ATimestamp%3A%20"
+      # timestampText;
+
+    let whatsappUrl = "https://wa.me/" # whatsappNumber # "?text=" # messageText;
+    whatsappUrl;
   };
 };

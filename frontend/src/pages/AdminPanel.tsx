@@ -1,272 +1,289 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import {
-  useGetCallerUserProfile,
-  useListProducts,
-  useAddProduct,
-  useUpdateProduct,
-  useDeleteProduct,
-} from '../hooks/useQueries';
-import { useActor } from '../hooks/useActor';
-import ProductForm from '../components/ProductForm';
+import { useQueryClient } from '@tanstack/react-query';
+import AdminDashboard from '../components/AdminDashboard';
+import AdminProductsSection from '../components/AdminProductsSection';
+import AdminCategoriesSection from '../components/AdminCategoriesSection';
 import BulkProductImport from '../components/BulkProductImport';
 import { Button } from '../components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
-import { Loader2, Plus, Edit, Trash2, AlertCircle } from 'lucide-react';
-import { toast } from 'sonner';
-import type { Product } from '../backend';
+import {
+  LayoutDashboard,
+  Package,
+  LayoutGrid,
+  Settings,
+  LogOut,
+  Menu,
+  X,
+  Loader2,
+  ChevronRight,
+  Upload,
+} from 'lucide-react';
+
+type AdminSection = 'dashboard' | 'products' | 'categories' | 'settings' | 'bulk-import';
+
+const NAV_ITEMS: { id: AdminSection; label: string; icon: React.ElementType; description: string }[] = [
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, description: 'Analytics overview' },
+  { id: 'products', label: 'Products', icon: Package, description: 'Manage your products' },
+  { id: 'categories', label: 'Categories', icon: LayoutGrid, description: 'Browse by category' },
+  { id: 'settings', label: 'Settings', icon: Settings, description: 'Admin settings' },
+];
 
 export default function AdminPanel() {
-  const { identity } = useInternetIdentity();
-  const { actor, isFetching: actorFetching } = useActor();
-  const { data: userProfile, isLoading: profileLoading } = useGetCallerUserProfile();
-  const { data: products, isLoading: productsLoading, error: productsError } = useListProducts();
-  const { mutateAsync: addProduct } = useAddProduct();
-  const { mutateAsync: updateProduct } = useUpdateProduct();
-  const { mutateAsync: deleteProduct } = useDeleteProduct();
+  const { identity, clear } = useInternetIdentity();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const [showForm, setShowForm] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | undefined>();
-  const [categoryFilter, setCategoryFilter] = useState<string>('All');
+  const [activeSection, setActiveSection] = useState<AdminSection>('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const isAuthenticated = !!identity;
 
-  // Debug logging
-  useEffect(() => {
-    console.log('🔍 [AdminPanel] State:', {
-      isAuthenticated,
-      hasActor: !!actor,
-      actorFetching,
-      principal: identity?.getPrincipal().toString(),
-      profileLoading,
-      userProfile: userProfile?.name,
-    });
-  }, [isAuthenticated, actor, actorFetching, identity, profileLoading, userProfile]);
-
   // Redirect to login if not authenticated
   useEffect(() => {
-    if (!isAuthenticated && !actorFetching) {
+    if (!isAuthenticated) {
       navigate({ to: '/login' });
     }
-  }, [isAuthenticated, actorFetching, navigate]);
+  }, [isAuthenticated, navigate]);
 
-  // Show loading while actor is initializing or checking authentication
-  if (!isAuthenticated || actorFetching || profileLoading) {
+  const handleLogout = async () => {
+    await clear();
+    queryClient.clear();
+    navigate({ to: '/' });
+  };
+
+  // Only block on authentication — never block on actorFetching
+  if (!isAuthenticated) {
     return (
-      <div className="flex flex-col justify-center items-center min-h-[60vh] space-y-4">
-        <Loader2 className="animate-spin text-primary" size={48} />
-        <p className="text-muted-foreground">
-          {!isAuthenticated 
-            ? 'Please log in...' 
-            : actorFetching 
-            ? 'Initializing admin panel...' 
-            : 'Loading your profile...'}
-        </p>
+      <div className="flex flex-col justify-center items-center min-h-screen bg-admin-bg gap-4">
+        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+          <Loader2 className="animate-spin text-primary" size={24} />
+        </div>
+        <p className="text-sm text-muted-foreground">Redirecting to login...</p>
       </div>
     );
   }
 
-  const handleAddProduct = async (product: Product) => {
-    try {
-      console.log('🔍 [AdminPanel] Adding product...');
-      await addProduct(product);
-      console.log('✅ [AdminPanel] Product added successfully');
-      toast.success('Product added successfully!');
-      setShowForm(false);
-    } catch (error: any) {
-      console.error('❌ [AdminPanel] Failed to add product:', error);
-      toast.error(error?.message || 'Failed to add product');
-    }
-  };
-
-  const handleUpdateProduct = async (product: Product) => {
-    if (editingProduct) {
-      try {
-        console.log('🔍 [AdminPanel] Updating product...');
-        await updateProduct({ productId: editingProduct.id, updatedProduct: product });
-        console.log('✅ [AdminPanel] Product updated successfully');
-        toast.success('Product updated successfully!');
-        setEditingProduct(undefined);
-        setShowForm(false);
-      } catch (error: any) {
-        console.error('❌ [AdminPanel] Failed to update product:', error);
-        toast.error(error?.message || 'Failed to update product');
-      }
-    }
-  };
-
-  const handleDeleteProduct = async (productId: string) => {
-    if (confirm('Are you sure you want to delete this product?')) {
-      try {
-        console.log('🔍 [AdminPanel] Deleting product...');
-        await deleteProduct(productId);
-        console.log('✅ [AdminPanel] Product deleted successfully');
-        toast.success('Product deleted successfully!');
-      } catch (error: any) {
-        console.error('❌ [AdminPanel] Failed to delete product:', error);
-        toast.error(error?.message || 'Failed to delete product');
-      }
-    }
-  };
-
-  const handleEdit = (product: Product) => {
-    setEditingProduct(product);
-    setShowForm(true);
-  };
-
-  const handleCancelForm = () => {
-    setShowForm(false);
-    setEditingProduct(undefined);
-  };
-
-  // Category filter logic
-  const categories = ['All', 'Mango Wood', 'Acacia Wood', 'Line Range', 'Customized Products'];
-  const filteredProducts = products?.filter(product => {
-    if (categoryFilter === 'All') return true;
-    
-    // Map category filter to woodType
-    const woodTypeMap: { [key: string]: string } = {
-      'Mango Wood': 'mangoWood',
-      'Acacia Wood': 'acaciaWood',
-      'Line Range': 'lineRange',
-      'Customized Products': 'customisedProducts',
-    };
-    
-    return product.woodType === woodTypeMap[categoryFilter];
-  }) || [];
+  const principalShort = identity?.getPrincipal().toString().slice(0, 12) + '...';
 
   return (
-    <div className="py-12">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-serif font-bold text-foreground">Admin Panel</h1>
-            <p className="text-sm text-muted-foreground mt-2">
-              Logged in as: {userProfile?.name || identity?.getPrincipal().toString()}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Admin Access: <span className="font-semibold text-green-600">✓ Granted</span>
-            </p>
+    <div className="min-h-screen bg-admin-bg flex">
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`fixed top-0 left-0 h-full w-64 bg-sidebar-bg border-r border-sidebar-border z-50 flex flex-col transition-transform duration-300 lg:translate-x-0 lg:static lg:z-auto ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        {/* Sidebar Header */}
+        <div className="px-6 py-6 border-b border-sidebar-border">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-lg font-serif font-bold text-foreground leading-tight">
+                WoodworkbyTanishas
+              </h1>
+              <p className="text-xs text-muted-foreground mt-0.5">Admin Panel</p>
+            </div>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden p-1.5 rounded-lg hover:bg-secondary/60 text-muted-foreground"
+            >
+              <X size={18} />
+            </button>
           </div>
-          {!showForm && (
-            <Button onClick={() => setShowForm(true)} className="flex items-center space-x-2">
-              <Plus size={20} />
-              <span>Add Product</span>
-            </Button>
-          )}
         </div>
 
-        {/* Error Display for Product List */}
-        {productsError && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error Loading Products</AlertTitle>
-            <AlertDescription>
-              {(productsError as Error).message || 'Failed to load products. Please try again.'}
-            </AlertDescription>
-          </Alert>
-        )}
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          {NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeSection === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setActiveSection(item.id);
+                  setSidebarOpen(false);
+                }}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all group ${
+                  isActive
+                    ? 'bg-primary text-primary-foreground shadow-xs'
+                    : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground'
+                }`}
+              >
+                <Icon size={18} className={isActive ? 'text-primary-foreground' : 'text-muted-foreground group-hover:text-foreground'} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium leading-none">{item.label}</p>
+                  <p className={`text-xs mt-0.5 truncate ${isActive ? 'text-primary-foreground/70' : 'text-muted-foreground/70'}`}>
+                    {item.description}
+                  </p>
+                </div>
+                {isActive && <ChevronRight size={14} className="text-primary-foreground/70 shrink-0" />}
+              </button>
+            );
+          })}
 
-        {/* Bulk Import Section - Show only if no products exist */}
-        {!productsLoading && !productsError && (!products || products.length === 0) && (
-          <BulkProductImport />
-        )}
+          {/* Bulk Import */}
+          <button
+            onClick={() => {
+              setActiveSection('bulk-import');
+              setSidebarOpen(false);
+            }}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all group ${
+              activeSection === 'bulk-import'
+                ? 'bg-primary text-primary-foreground shadow-xs'
+                : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground'
+            }`}
+          >
+            <Upload size={18} className={activeSection === 'bulk-import' ? 'text-primary-foreground' : 'text-muted-foreground group-hover:text-foreground'} />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium leading-none">Bulk Import</p>
+              <p className={`text-xs mt-0.5 truncate ${activeSection === 'bulk-import' ? 'text-primary-foreground/70' : 'text-muted-foreground/70'}`}>
+                Import multiple products
+              </p>
+            </div>
+            {activeSection === 'bulk-import' && <ChevronRight size={14} className="text-primary-foreground/70 shrink-0" />}
+          </button>
+        </nav>
 
-        {showForm && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-serif font-bold text-foreground mb-6">
-              {editingProduct ? 'Edit Product' : 'Add New Product'}
-            </h2>
-            <ProductForm
-              product={editingProduct}
-              onSubmit={editingProduct ? handleUpdateProduct : handleAddProduct}
-              onCancel={handleCancelForm}
-            />
-          </div>
-        )}
-
-        <div>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-serif font-bold text-foreground">Products</h2>
-            
-            {/* Category Filter */}
-            <div className="flex gap-2 flex-wrap">
-              {categories.map((category) => (
-                <Button
-                  key={category}
-                  variant={categoryFilter === category ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setCategoryFilter(category)}
-                >
-                  {category}
-                </Button>
-              ))}
+        {/* Sidebar Footer - User Info */}
+        <div className="px-4 py-4 border-t border-sidebar-border">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+              <span className="text-xs font-bold text-primary">A</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-foreground truncate">Administrator</p>
+              <p className="text-xs text-muted-foreground truncate">{principalShort}</p>
             </div>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleLogout}
+            className="w-full gap-2 text-xs border-border/60 hover:border-destructive/40 hover:text-destructive"
+          >
+            <LogOut size={13} />
+            Sign Out
+          </Button>
+        </div>
+      </aside>
 
-          {productsLoading ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="animate-spin text-primary" size={40} />
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top Bar */}
+        <header className="sticky top-0 z-30 bg-admin-bg/95 backdrop-blur-sm border-b border-border/50 px-4 sm:px-6 py-4 flex items-center gap-4">
+          {/* Mobile menu toggle */}
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden p-2 rounded-lg hover:bg-secondary/60 text-muted-foreground"
+          >
+            <Menu size={20} />
+          </button>
+
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-muted-foreground hidden sm:inline">Admin</span>
+            <ChevronRight size={14} className="text-muted-foreground hidden sm:inline" />
+            <span className="font-medium text-foreground capitalize">
+              {activeSection === 'bulk-import' ? 'Bulk Import' : activeSection}
+            </span>
+          </div>
+
+          <div className="ml-auto flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground bg-secondary/40 px-3 py-1.5 rounded-full border border-border/40">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Admin Access
             </div>
-          ) : filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProducts.map((product) => (
-                <div key={product.id} className="bg-card rounded-lg shadow-md overflow-hidden">
-                  <div className="aspect-[4/3] bg-muted">
-                    {product.imageUrls[0] ? (
-                      <img
-                        src={product.imageUrls[0].getDirectURL()}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                        No Image
-                      </div>
-                    )}
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8 overflow-auto">
+          {activeSection === 'dashboard' && <AdminDashboard />}
+          {activeSection === 'products' && <AdminProductsSection />}
+          {activeSection === 'categories' && <AdminCategoriesSection />}
+          {activeSection === 'bulk-import' && (
+            <div className="space-y-6 animate-fade-in">
+              <div>
+                <h2 className="text-2xl font-serif font-bold text-foreground">Bulk Import</h2>
+                <p className="text-sm text-muted-foreground mt-1">Import multiple products at once</p>
+              </div>
+              <BulkProductImport />
+            </div>
+          )}
+          {activeSection === 'settings' && (
+            <div className="space-y-6 animate-fade-in">
+              <div>
+                <h2 className="text-2xl font-serif font-bold text-foreground">Settings</h2>
+                <p className="text-sm text-muted-foreground mt-1">Admin account and store settings</p>
+              </div>
+
+              {/* Account Info Card */}
+              <div className="rounded-xl border border-border/50 bg-card p-6 max-w-lg">
+                <h3 className="text-base font-semibold text-foreground mb-4">Account Information</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between py-2 border-b border-border/40">
+                    <span className="text-sm text-muted-foreground">Role</span>
+                    <span className="text-sm font-medium bg-primary/10 text-primary px-2.5 py-0.5 rounded-full">
+                      Administrator
+                    </span>
                   </div>
-                  <div className="p-4">
-                    <h3 className="text-lg font-semibold text-foreground mb-2">{product.name}</h3>
-                    <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{product.description}</p>
-                    <p className="text-xs text-muted-foreground mb-4">
-                      Category: {product.category} | Wood: {product.woodType}
-                    </p>
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(product)}
-                        className="flex-1"
-                      >
-                        <Edit size={16} className="mr-1" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDeleteProduct(product.id)}
-                        className="flex-1"
-                      >
-                        <Trash2 size={16} className="mr-1" />
-                        Delete
-                      </Button>
+                  <div className="flex items-start justify-between py-2 border-b border-border/40">
+                    <span className="text-sm text-muted-foreground">Principal ID</span>
+                    <span className="text-xs font-mono text-foreground/80 max-w-[200px] break-all text-right">
+                      {identity?.getPrincipal().toString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-sm text-muted-foreground">Access Level</span>
+                    <div className="flex items-center gap-1.5 text-sm text-emerald-700">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      Full Access
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">
-                {categoryFilter === 'All' 
-                  ? 'No products yet. Use the bulk import above or add products individually!' 
-                  : `No products found in ${categoryFilter} category.`}
-              </p>
+              </div>
+
+              {/* Store Info Card */}
+              <div className="rounded-xl border border-border/50 bg-card p-6 max-w-lg">
+                <h3 className="text-base font-semibold text-foreground mb-4">Store Information</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between py-2 border-b border-border/40">
+                    <span className="text-sm text-muted-foreground">Store Name</span>
+                    <span className="text-sm font-medium text-foreground">WoodworkbyTanishas</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-border/40">
+                    <span className="text-sm text-muted-foreground">WhatsApp</span>
+                    <span className="text-sm font-medium text-foreground">+91 9828288383</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-sm text-muted-foreground">Platform</span>
+                    <span className="text-sm font-medium text-foreground">Internet Computer</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="max-w-lg">
+                <Button
+                  variant="outline"
+                  onClick={handleLogout}
+                  className="gap-2 border-destructive/30 text-destructive hover:bg-destructive/5"
+                >
+                  <LogOut size={15} />
+                  Sign Out of Admin Panel
+                </Button>
+              </div>
             </div>
           )}
-        </div>
+        </main>
       </div>
     </div>
   );

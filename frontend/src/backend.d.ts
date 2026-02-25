@@ -14,24 +14,27 @@ export class ExternalBlob {
     static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
     withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
 }
-export interface Product {
-    id: ProductId;
-    imageUrls: Array<ExternalBlob>;
-    name: string;
-    description: string;
-    isActive: boolean;
-    category: string;
-    woodType: WoodType;
-    finishInfo: string;
+export interface AnalyticsSummary {
+    totalProducts: bigint;
+    recentContactSubmissions: Array<ContactFormSubmission>;
+    totalCustomizationRequests: bigint;
+    recentCustomizationRequests: Array<CustomizationRequest>;
+    productsByCategory: Array<[string, Array<Product>]>;
+    inactiveProducts: bigint;
+    totalContactSubmissions: bigint;
+    activeProducts: bigint;
 }
+export type Time = bigint;
+export type ImageId = Uint8Array;
 export interface ContactFormSubmission {
+    id: string;
     name: string;
     email: string;
     message: string;
     timestamp: Time;
 }
-export type Time = bigint;
 export interface CustomizationRequest {
+    id: string;
     status: string;
     name: string;
     referenceImageUrl?: ExternalBlob;
@@ -44,10 +47,23 @@ export interface CustomizationRequest {
     dimensions: string;
 }
 export type ProductId = string;
+export interface PaginatedProducts {
+    total: bigint;
+    products: Array<Product>;
+}
+export interface Product {
+    id: ProductId;
+    whatsappMessage?: string;
+    imageUrls: Array<ImageId>;
+    name: string;
+    description: string;
+    isActive: boolean;
+    category: string;
+    woodType: WoodType;
+    finishInfo: string;
+}
 export interface UserProfile {
     name: string;
-    email?: string;
-    phone?: string;
 }
 export enum UserRole {
     admin = "admin",
@@ -64,21 +80,20 @@ export interface backendInterface {
     addProduct(product: Product): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     deleteProduct(productId: ProductId): Promise<void>;
+    getAnalyticsSummary(): Promise<AnalyticsSummary>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
-    getContactFormSubmissions(): Promise<Array<ContactFormSubmission>>;
-    getCustomizationRequests(): Promise<Array<CustomizationRequest>>;
     getFeaturedProducts(): Promise<Array<Product>>;
-    getMangoWoodProductByIdInternal(productId: ProductId): Promise<Product>;
-    getMangoWoodProductsInternal(category: string | null): Promise<Array<Product>>;
+    getMostRecentContactFormSubmissions(limit: bigint): Promise<Array<ContactFormSubmission>>;
+    getMostRecentCustomizationRequests(limit: bigint): Promise<Array<CustomizationRequest>>;
     getProductById(productId: ProductId): Promise<Product>;
     getProducts(category: string | null): Promise<Array<Product>>;
+    getProductsGroupedByCategory(): Promise<Array<[string, Array<Product>]>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
-    listMangoWoodProductsInternal(): Promise<Array<Product>>;
-    listProducts(): Promise<Array<Product>>;
+    listProducts(offset: bigint, limit: bigint): Promise<PaginatedProducts>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    submitContactForm(submission: ContactFormSubmission): Promise<void>;
+    submitContactForm(submission: ContactFormSubmission): Promise<string>;
     submitCustomizationRequest(request: CustomizationRequest): Promise<void>;
     updateProduct(productId: ProductId, updatedProduct: Product): Promise<void>;
 }

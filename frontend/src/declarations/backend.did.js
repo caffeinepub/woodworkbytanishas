@@ -20,7 +20,7 @@ export const _CaffeineStorageRefillResult = IDL.Record({
   'topped_up_amount' : IDL.Opt(IDL.Nat),
 });
 export const ProductId = IDL.Text;
-export const ExternalBlob = IDL.Vec(IDL.Nat8);
+export const ImageId = IDL.Vec(IDL.Nat8);
 export const WoodType = IDL.Variant({
   'lineRange' : IDL.Null,
   'acaciaWood' : IDL.Null,
@@ -29,7 +29,8 @@ export const WoodType = IDL.Variant({
 });
 export const Product = IDL.Record({
   'id' : ProductId,
-  'imageUrls' : IDL.Vec(ExternalBlob),
+  'whatsappMessage' : IDL.Opt(IDL.Text),
+  'imageUrls' : IDL.Vec(ImageId),
   'name' : IDL.Text,
   'description' : IDL.Text,
   'isActive' : IDL.Bool,
@@ -42,19 +43,17 @@ export const UserRole = IDL.Variant({
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
-export const UserProfile = IDL.Record({
-  'name' : IDL.Text,
-  'email' : IDL.Opt(IDL.Text),
-  'phone' : IDL.Opt(IDL.Text),
-});
 export const Time = IDL.Int;
 export const ContactFormSubmission = IDL.Record({
+  'id' : IDL.Text,
   'name' : IDL.Text,
   'email' : IDL.Text,
   'message' : IDL.Text,
   'timestamp' : Time,
 });
+export const ExternalBlob = IDL.Vec(IDL.Nat8);
 export const CustomizationRequest = IDL.Record({
+  'id' : IDL.Text,
   'status' : IDL.Text,
   'name' : IDL.Text,
   'referenceImageUrl' : IDL.Opt(ExternalBlob),
@@ -65,6 +64,21 @@ export const CustomizationRequest = IDL.Record({
   'phone' : IDL.Text,
   'woodType' : WoodType,
   'dimensions' : IDL.Text,
+});
+export const AnalyticsSummary = IDL.Record({
+  'totalProducts' : IDL.Nat,
+  'recentContactSubmissions' : IDL.Vec(ContactFormSubmission),
+  'totalCustomizationRequests' : IDL.Nat,
+  'recentCustomizationRequests' : IDL.Vec(CustomizationRequest),
+  'productsByCategory' : IDL.Vec(IDL.Tuple(IDL.Text, IDL.Vec(Product))),
+  'inactiveProducts' : IDL.Nat,
+  'totalContactSubmissions' : IDL.Nat,
+  'activeProducts' : IDL.Nat,
+});
+export const UserProfile = IDL.Record({ 'name' : IDL.Text });
+export const PaginatedProducts = IDL.Record({
+  'total' : IDL.Nat,
+  'products' : IDL.Vec(Product),
 });
 
 export const idlService = IDL.Service({
@@ -98,41 +112,36 @@ export const idlService = IDL.Service({
   'addProduct' : IDL.Func([Product], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'deleteProduct' : IDL.Func([ProductId], [], []),
+  'getAnalyticsSummary' : IDL.Func([], [AnalyticsSummary], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-  'getContactFormSubmissions' : IDL.Func(
-      [],
+  'getFeaturedProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
+  'getMostRecentContactFormSubmissions' : IDL.Func(
+      [IDL.Nat],
       [IDL.Vec(ContactFormSubmission)],
       ['query'],
     ),
-  'getCustomizationRequests' : IDL.Func(
-      [],
+  'getMostRecentCustomizationRequests' : IDL.Func(
+      [IDL.Nat],
       [IDL.Vec(CustomizationRequest)],
-      ['query'],
-    ),
-  'getFeaturedProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
-  'getMangoWoodProductByIdInternal' : IDL.Func(
-      [ProductId],
-      [Product],
-      ['query'],
-    ),
-  'getMangoWoodProductsInternal' : IDL.Func(
-      [IDL.Opt(IDL.Text)],
-      [IDL.Vec(Product)],
       ['query'],
     ),
   'getProductById' : IDL.Func([ProductId], [Product], ['query']),
   'getProducts' : IDL.Func([IDL.Opt(IDL.Text)], [IDL.Vec(Product)], ['query']),
+  'getProductsGroupedByCategory' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Tuple(IDL.Text, IDL.Vec(Product)))],
+      ['query'],
+    ),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
-  'listMangoWoodProductsInternal' : IDL.Func([], [IDL.Vec(Product)], ['query']),
-  'listProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
+  'listProducts' : IDL.Func([IDL.Nat, IDL.Nat], [PaginatedProducts], ['query']),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
-  'submitContactForm' : IDL.Func([ContactFormSubmission], [], []),
+  'submitContactForm' : IDL.Func([ContactFormSubmission], [IDL.Text], []),
   'submitCustomizationRequest' : IDL.Func([CustomizationRequest], [], []),
   'updateProduct' : IDL.Func([ProductId, Product], [], []),
 });
@@ -152,7 +161,7 @@ export const idlFactory = ({ IDL }) => {
     'topped_up_amount' : IDL.Opt(IDL.Nat),
   });
   const ProductId = IDL.Text;
-  const ExternalBlob = IDL.Vec(IDL.Nat8);
+  const ImageId = IDL.Vec(IDL.Nat8);
   const WoodType = IDL.Variant({
     'lineRange' : IDL.Null,
     'acaciaWood' : IDL.Null,
@@ -161,7 +170,8 @@ export const idlFactory = ({ IDL }) => {
   });
   const Product = IDL.Record({
     'id' : ProductId,
-    'imageUrls' : IDL.Vec(ExternalBlob),
+    'whatsappMessage' : IDL.Opt(IDL.Text),
+    'imageUrls' : IDL.Vec(ImageId),
     'name' : IDL.Text,
     'description' : IDL.Text,
     'isActive' : IDL.Bool,
@@ -174,19 +184,17 @@ export const idlFactory = ({ IDL }) => {
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
-  const UserProfile = IDL.Record({
-    'name' : IDL.Text,
-    'email' : IDL.Opt(IDL.Text),
-    'phone' : IDL.Opt(IDL.Text),
-  });
   const Time = IDL.Int;
   const ContactFormSubmission = IDL.Record({
+    'id' : IDL.Text,
     'name' : IDL.Text,
     'email' : IDL.Text,
     'message' : IDL.Text,
     'timestamp' : Time,
   });
+  const ExternalBlob = IDL.Vec(IDL.Nat8);
   const CustomizationRequest = IDL.Record({
+    'id' : IDL.Text,
     'status' : IDL.Text,
     'name' : IDL.Text,
     'referenceImageUrl' : IDL.Opt(ExternalBlob),
@@ -197,6 +205,21 @@ export const idlFactory = ({ IDL }) => {
     'phone' : IDL.Text,
     'woodType' : WoodType,
     'dimensions' : IDL.Text,
+  });
+  const AnalyticsSummary = IDL.Record({
+    'totalProducts' : IDL.Nat,
+    'recentContactSubmissions' : IDL.Vec(ContactFormSubmission),
+    'totalCustomizationRequests' : IDL.Nat,
+    'recentCustomizationRequests' : IDL.Vec(CustomizationRequest),
+    'productsByCategory' : IDL.Vec(IDL.Tuple(IDL.Text, IDL.Vec(Product))),
+    'inactiveProducts' : IDL.Nat,
+    'totalContactSubmissions' : IDL.Nat,
+    'activeProducts' : IDL.Nat,
+  });
+  const UserProfile = IDL.Record({ 'name' : IDL.Text });
+  const PaginatedProducts = IDL.Record({
+    'total' : IDL.Nat,
+    'products' : IDL.Vec(Product),
   });
   
   return IDL.Service({
@@ -230,27 +253,18 @@ export const idlFactory = ({ IDL }) => {
     'addProduct' : IDL.Func([Product], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'deleteProduct' : IDL.Func([ProductId], [], []),
+    'getAnalyticsSummary' : IDL.Func([], [AnalyticsSummary], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-    'getContactFormSubmissions' : IDL.Func(
-        [],
+    'getFeaturedProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
+    'getMostRecentContactFormSubmissions' : IDL.Func(
+        [IDL.Nat],
         [IDL.Vec(ContactFormSubmission)],
         ['query'],
       ),
-    'getCustomizationRequests' : IDL.Func(
-        [],
+    'getMostRecentCustomizationRequests' : IDL.Func(
+        [IDL.Nat],
         [IDL.Vec(CustomizationRequest)],
-        ['query'],
-      ),
-    'getFeaturedProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
-    'getMangoWoodProductByIdInternal' : IDL.Func(
-        [ProductId],
-        [Product],
-        ['query'],
-      ),
-    'getMangoWoodProductsInternal' : IDL.Func(
-        [IDL.Opt(IDL.Text)],
-        [IDL.Vec(Product)],
         ['query'],
       ),
     'getProductById' : IDL.Func([ProductId], [Product], ['query']),
@@ -259,20 +273,24 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(Product)],
         ['query'],
       ),
+    'getProductsGroupedByCategory' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Text, IDL.Vec(Product)))],
+        ['query'],
+      ),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
-    'listMangoWoodProductsInternal' : IDL.Func(
-        [],
-        [IDL.Vec(Product)],
+    'listProducts' : IDL.Func(
+        [IDL.Nat, IDL.Nat],
+        [PaginatedProducts],
         ['query'],
       ),
-    'listProducts' : IDL.Func([], [IDL.Vec(Product)], ['query']),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
-    'submitContactForm' : IDL.Func([ContactFormSubmission], [], []),
+    'submitContactForm' : IDL.Func([ContactFormSubmission], [IDL.Text], []),
     'submitCustomizationRequest' : IDL.Func([CustomizationRequest], [], []),
     'updateProduct' : IDL.Func([ProductId, Product], [], []),
   });
